@@ -1,0 +1,623 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Reuse the same root variables and base styles from the list page */
+    :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --primary-light: #eef2ff;
+        --secondary: #3f37c9;
+        --accent: #4895ef;
+        --success: #4cc9f0;
+        --info: #4361ee;
+        --warning: #f8961e;
+        --danger: #f72585;
+        --dark: #1a1a2e;
+        --darker: #16213e;
+        --light: #f8f9fa;
+        --lighter: #f1f3f9;
+        --gray: #6c757d;
+        --gray-light: #e9ecef;
+        --white: #ffffff;
+        --header-height: 80px;
+        --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --border-radius: 0.375rem;
+        --border-radius-lg: 0.5rem;
+        --border-radius-xl: 1rem;
+    }
+
+    /* Main Content Styles */
+    .main-content {
+        flex: 1;
+        margin-left: var(--sidebar-width, 280px);
+        padding: 2rem;
+        transition: var(--transition);
+    }
+
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .notification-btn, .message-btn, .profile-btn {
+        position: relative;
+        color: var(--dark);
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: var(--transition);
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: var(--white);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .notification-btn:hover, .message-btn:hover, .profile-btn:hover {
+        color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: -3px;
+        right: -3px;
+        background-color: var(--danger);
+        color: var(--white);
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+        border: 2px solid var(--lighter);
+    }
+
+    .profile-btn img {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--primary-light);
+    }
+
+
+    /* Form Header Styles */
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--gray-light);
+        animation: fadeInDown 0.6s ease;
+    }
+
+    .form-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .form-header h1::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -2.2rem;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        border-radius: 2px;
+    }
+
+    .form-header p {
+        color: var(--gray);
+        font-size: 0.95rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Form Container Styles */
+    .form-container {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.8s ease;
+    }
+
+    /* Form Section Styles */
+    .form-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .form-section h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--gray-light);
+        position: relative;
+    }
+
+    .form-section h3::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -1px;
+        width: 40px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        border-radius: 2px;
+    }
+
+    /* Form Grid Layout */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    /* Form Group Styles */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--dark);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--gray-light);
+        border-radius: var(--border-radius);
+        font-size: 0.925rem;
+        transition: var(--transition);
+        background-color: var(--white);
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.2);
+    }
+
+    .form-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+    }
+
+    /* File Upload Styles */
+    .file-upload {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1.5rem;
+        border: 2px dashed var(--gray-light);
+        border-radius: var(--border-radius);
+        background-color: var(--lighter);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .file-upload:hover {
+        border-color: var(--primary);
+        background-color: var(--primary-light);
+    }
+
+    .file-upload i {
+        font-size: 2rem;
+        color: var(--primary);
+        margin-bottom: 0.75rem;
+    }
+
+    .file-upload p {
+        color: var(--gray);
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+
+    .file-upload small {
+        color: var(--gray);
+        font-size: 0.8rem;
+    }
+
+    #photo-preview {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--primary-light);
+        margin: 0 auto 1rem;
+        display: none;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--gray-light);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-size: 0.925rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        box-shadow: var(--shadow-sm);
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: var(--white);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    .btn-secondary {
+        background-color: var(--white);
+        color: var(--primary);
+        border: 1px solid var(--primary-light);
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--primary-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    .btn i {
+        margin-right: 8px;
+        font-size: 0.9rem;
+    }
+
+    /* Error Messages */
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin-top: 0.5rem;
+        color: var(--danger);
+        font-size: 0.85rem;
+    }
+
+    .is-invalid {
+        border-color: var(--danger) !important;
+    }
+
+    .invalid-feedback {
+        color: var(--danger);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity:0; }
+        to { opacity:1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+    <header class="form-header">
+        <div class="header-left">
+            <h1>Add New Beneficiary</h1>
+            <p>Fill in the details below to register a new student beneficiary</p>
+        </div>
+        <div class="header-actions">
+            <div class="notification-btn tooltip" data-tooltip="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">{{ unread_notifications }}</span>
+            </div>
+            <div class="message-btn tooltip" data-tooltip="Messages">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="profile-btn">
+                <img src="{% static 'img/avatar.png' %}" alt="Profile">
+            </div>
+        </div>
+    </header>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <h3>Personal Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <input type="text" id="first_name" name="first_name" class="form-control" 
+                               value="{{ form_data.first_name }}" required>
+                        {% if errors.first_name %}
+                            <div class="invalid-feedback">{{ errors.first_name }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <input type="text" id="last_name" name="last_name" class="form-control"
+                               value="{{ form_data.last_name }}" required>
+                        {% if errors.last_name %}
+                            <div class="invalid-feedback">{{ errors.last_name }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth</label>
+                        <input type="date" id="date_of_birth" name="date_of_birth" class="form-control"
+                               value="{{ form_data.date_of_birth }}" required>
+                        {% if errors.date_of_birth %}
+                            <div class="invalid-feedback">{{ errors.date_of_birth }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender" class="form-control" required>
+                            <option value="">Select Gender</option>
+                            {% for gender in genders %}
+                                <option value="{{ gender.0 }}" 
+                                    {% if form_data.gender == gender.0 %}selected{% endif %}>
+                                    {{ gender.1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.gender %}
+                            <div class="invalid-feedback">{{ errors.gender }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="national_id">National ID/Passport</label>
+                        <input type="text" id="national_id" name="national_id" class="form-control"
+                               value="{{ form_data.national_id }}">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Information Section -->
+            <div class="form-section">
+                <h3>Contact Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="phone_number">Phone Number</label>
+                        <input type="text" id="phone_number" name="phone_number" class="form-control"
+                               value="{{ form_data.phone_number }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-control"
+                               value="{{ form_data.email }}">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Education Information Section -->
+            <div class="form-section">
+                <h3>Education Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="current_level">Current Education Level</label>
+                        <select id="current_level" name="current_level" class="form-control" required>
+                            <option value="">Select Level</option>
+                            {% for level in education_levels %}
+                                <option value="{{ level.0 }}"
+                                    {% if form_data.current_level == level.0 %}selected{% endif %}>
+                                    {{ level.1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if errors.current_level %}
+                            <div class="invalid-feedback">{{ errors.current_level }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="institution">Institution</label>
+                        <select id="institution" name="institution" class="form-control">
+                            <option value="">Select Institution</option>
+                            {% for institution in institutions %}
+                                <option value="{{ institution.id }}"
+                                    {% if form_data.institution == institution.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ institution.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="enrollment_date">Enrollment Date</label>
+                        <input type="date" id="enrollment_date" name="enrollment_date" class="form-control"
+                               value="{{ form_data.enrollment_date|default:'' }}" required>
+                        {% if errors.enrollment_date %}
+                            <div class="invalid-feedback">{{ errors.enrollment_date }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sponsorship Information Section -->
+            <div class="form-section">
+                <h3>Sponsorship Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="sponsor">Sponsor</label>
+                        <select id="sponsor" name="sponsor" class="form-control">
+                            <option value="">Select Sponsor</option>
+                            {% for sponsor in sponsors %}
+                                <option value="{{ sponsor.id }}"
+                                    {% if form_data.sponsor == sponsor.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ sponsor.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Photo Upload Section -->
+            <div class="form-section">
+                <h3>Student Photo</h3>
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label for="photo">Upload Photo</label>
+                        <div class="file-upload" onclick="document.getElementById('photo').click()">
+                            <img id="photo-preview" src="#" alt="Preview" />
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload student photo</p>
+                            <small>Recommended size: 500x500px, Max size: 2MB</small>
+                            <input type="file" id="photo" name="photo" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{% url 'beneficiaries_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Beneficiary
+                </button>
+            </div>
+        </form>
+    </div>
+
+<script>
+    // Photo preview functionality
+    document.getElementById('id_photo').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const preview = document.getElementById('photo-preview');
+                preview.src = event.target.result;
+                preview.style.display = 'block';
+                // Hide the upload icon when image is selected
+                const uploadIcon = document.querySelector('.file-upload i');
+                if (uploadIcon) uploadIcon.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Initialize date pickers
+    document.addEventListener('DOMContentLoaded', function() {
+        // This would be replaced with your actual date picker initialization
+        // For example, using flatpickr or another library
+        const dateFields = [
+            'id_date_of_birth',
+            'id_enrollment_date',
+            'id_expected_graduation',
+            'id_sponsorship_start_date',
+            'id_sponsorship_end_date'
+        ];
+        
+        dateFields.forEach(function(id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.type = 'date';
+            }
+        });
+    });
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Check required fields
+        const requiredFields = [
+            'id_first_name',
+            'id_last_name',
+            'id_date_of_birth',
+            'id_gender',
+            'id_current_level',
+            'id_enrollment_date'
+        ];
+        
+        requiredFields.forEach(function(id) {
+            const field = document.getElementById(id);
+            if (field && !field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else if (field) {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll to first error
+            const firstError = document.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+</script>
+{% endblock %}

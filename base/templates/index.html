@@ -1,0 +1,766 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KLK | Education Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --primary-light: #eef2ff;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --success: #4cc9f0;
+            --info: #4361ee;
+            --warning: #f8961e;
+            --danger: #f72585;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --light: #f8f9fa;
+            --lighter: #f1f3f9;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --white: #ffffff;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 90px;
+            --header-height: 80px;
+            --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --border-radius: 0.375rem;
+            --border-radius-lg: 0.5rem;
+            --border-radius-xl: 1rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--lighter);
+            color: var(--dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+
+
+
+        /* Enhanced Message System */
+        .message-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+            width: 100%;
+        }
+
+        .message-alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(120%);
+            animation: slideIn 0.5s forwards, fadeOut 0.5s forwards 4.5s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .message-alert::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            animation: progressBar 5s linear forwards;
+        }
+
+        .message-alert.success {
+            background-color: #28A745;
+            color: white;
+            border-left: 4px solid #1e7e34;
+        }
+
+        .message-alert.error {
+            background-color: #E74C3C;
+            color: white;
+            border-left: 4px solid #c0392b;
+        }
+
+        .message-alert.warning {
+            background-color: #FFA500;
+            color: white;
+            border-left: 4px solid #cc8400;
+        }
+
+        .message-alert.info {
+            background-color: #17A2B8;
+            color: white;
+            border-left: 4px solid #117a8b;
+        }
+
+        .message-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .message-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-left: 10px;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .message-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideIn {
+            to { transform: translateX(0); }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+
+        @keyframes progressBar {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--white);
+            transition: var(--transition);
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 1rem 0.5rem 2rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+        }
+
+        .sidebar-header .logo {
+            width: 42px;
+            height: 42px;
+            margin-right: 12px;
+            object-fit: contain;
+            transition: var(--transition);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            transition: var(--transition);
+            white-space: nowrap;
+            color: rgb(0, 153, 255);
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+            height: calc(100% - 180px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+        }
+
+        .sidebar-nav > ul > li {
+            position: relative;
+        }
+
+        .sidebar-nav > ul > li > a {
+            display: flex;
+            align-items: center;
+            padding: 0.85rem 1.5rem;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 0.925rem;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-nav > ul > li > a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background-color: var(--accent);
+            transform: translateX(-100%);
+            transition: var(--transition);
+        }
+
+        .sidebar-nav > ul > li > a:hover {
+            color: var(--white);
+            background-color: rgba(255, 255, 255, 0.08);
+            padding-left: 1.75rem;
+        }
+
+        .sidebar-nav > ul > li > a:hover::before {
+            transform: translateX(0);
+        }
+
+        .sidebar-nav > ul > li > a i {
+            margin-right: 12px;
+            font-size: 1rem;
+            width: 24px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .sidebar-nav > ul > li > a .dropdown {
+            margin-left: auto;
+            font-size: 0.75rem;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-nav > ul > li.active > a {
+            color: var(--white);
+            background-color: rgba(67, 97, 238, 0.2);
+            padding-left: 1.75rem;
+        }
+
+        .sidebar-nav > ul > li.active > a::before {
+            transform: translateX(0);
+        }
+
+        .sidebar-nav .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: rgba(0, 0, 0, 0.15);
+            padding-left: 3rem;
+        }
+
+        .sidebar-nav .submenu li a {
+            display: block;
+            padding: 0.7rem 0;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .sidebar-nav .submenu li a::after {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: var(--transition);
+        }
+
+        .sidebar-nav .submenu li a:hover {
+            color: var(--white);
+            padding-left: 0.5rem;
+        }
+
+        .sidebar-nav .submenu li a:hover::after {
+            background-color: var(--accent);
+        }
+
+        .sidebar-nav > ul > li.show-submenu .submenu {
+            max-height: 500px;
+        }
+
+        .sidebar-nav > ul > li.show-submenu > a .dropdown {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.25rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .user-profile img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+        }
+
+        .user-info h4 {
+            font-size: 0.925rem;
+            font-weight: 600;
+            margin-bottom: 3px;
+            transition: var(--transition);
+        }
+
+        .user-info p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            transition: var(--transition);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            font-size: 0.925rem;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0;
+            border-radius: var(--border-radius);
+        }
+
+        .logout-btn:hover {
+            color: var(--white);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .logout-btn i {
+            margin-right: 10px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        /* Responsive Design - More refined breakpoints */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: var(--sidebar-collapsed-width);
+            }
+            
+            .sidebar-header h2, 
+            .sidebar-nav > ul > li > a span,
+            .user-info,
+            .logout-btn span,
+            .sidebar-nav > ul > li > a .dropdown {
+                display: none;
+            }
+            
+            .sidebar-header {
+                justify-content: center;
+                padding: 1.25rem 0.5rem;
+            }
+            
+            .sidebar-header .logo {
+                margin-right: 0;
+            }
+            
+            .sidebar-nav > ul > li > a {
+                justify-content: center;
+                padding: 1rem 0;
+            }
+            
+            .sidebar-nav > ul > li > a i {
+                margin-right: 0;
+                font-size: 1.2rem;
+            }
+            
+            .sidebar-nav .submenu {
+                display: none;
+            }
+            
+            .sidebar-footer {
+                padding: 1rem 0.5rem;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .user-profile img {
+                margin-right: 0;
+            }
+            
+        }
+
+    </style>
+
+</head>
+<body>
+
+
+
+    <div class="message-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message-alert {{ message.tags }}">
+                    <i class="message-icon fas 
+                        {% if message.tags == 'success' %}fa-check-circle
+                        {% elif message.tags == 'error' %}fa-exclamation-circle
+                        {% elif message.tags == 'warning' %}fa-exclamation-triangle
+                        {% else %}fa-info-circle{% endif %}">
+                    </i>
+                    <div class="message-content">
+                        <div class="message-title">
+                            {% if message.tags == 'success' %}Success!
+                            {% elif message.tags == 'error' %}Error
+                            {% elif message.tags == 'warning' %}Warning
+                            {% else %}Notice{% endif %}
+                        </div>
+                        <div class="message-text">{{ message }}</div>
+                    </div>
+                    <button class="message-close">&times;</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+
+    <div class="container">
+
+        <!-- Enhanced Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="{% static 'images/klk.jpeg' %}" alt="Kids League Kenya Logo" class="logo">
+                <h2>Kids League Kenya</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="{% url 'dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'beneficiaries_list' %}">
+                            <i class="fas fa-user-graduate"></i>
+                            <span>Beneficiaries</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Education Levels</span>
+                            <i class="fas fa-chevron-down dropdown"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="#">Pre-School</a></li>
+                            <li><a href="#">Primary</a></li>
+                            <li><a href="#">Secondary</a></li>
+                            <li><a href="#">University/College</a></li>
+                            <li><a href="#">Vocational</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-money-check-alt"></i>
+                            <span>Financial Aid</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Performance Analytics</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Academic Calendar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-envelope"></i>
+                            <span>Communication</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-cog"></i>
+                            <span>System Settings</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admin:index' %}">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Admin Panel</span>
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="Profile picture">
+                    {% else %}
+                        <img src="{% static 'images/avatar.png' %}" alt="Default profile picture">
+                    {% endif %}
+                    <div class="user-info">
+                        <h4>{{request.user.username}}</h4>
+                        <p>{{request.user.email}}</p>
+                    </div>
+                </div>
+                <a href="{% url 'logout_view' %}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+
+    // Initialize charts
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const dropdownItems = document.querySelectorAll('.sidebar-nav > ul > li > a .dropdown');
+    
+            dropdownItems.forEach(item => {
+                item.parentElement.addEventListener('click', function(e) {
+                    if (window.innerWidth > 992) {
+                        e.preventDefault();
+                        const parentLi = this.parentElement;
+                        parentLi.classList.toggle('show-submenu');
+                    }
+                });
+            });
+        // Level Distribution Chart
+        const levelCtx = document.getElementById('levelDistributionChart').getContext('2d');
+        const levelChart = new Chart(levelCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pre-School', 'Primary', 'Secondary', 'University', 'Vocational'],
+                datasets: [{
+                    data: [185, 642, 423, 127, 50],
+                    backgroundColor: [
+                        '#4361ee',
+                        '#3f37c9',
+                        '#4895ef',
+                        '#4cc9f0',
+                        '#f72585'
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '70%',
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        });
+
+        // Performance Trend Chart
+        const performanceCtx = document.getElementById('performanceTrendChart').getContext('2d');
+        const performanceChart = new Chart(performanceCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Average Score',
+                        data: [65, 68, 72, 75, 78, 82],
+                        backgroundColor: '#4361ee',
+                        borderRadius: 6,
+                        borderSkipped: false
+                    },
+                    {
+                        label: 'Top Score',
+                        data: [85, 88, 90, 92, 94, 96],
+                        backgroundColor: '#4cc9f0',
+                        borderRadius: 6,
+                        borderSkipped: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        align: 'end',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: false,
+                        min: 50,
+                        max: 100,
+                        grid: {
+                            drawBorder: false
+                        },
+                        ticks: {
+                            stepSize: 10
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+
+        // Tab functionality for charts
+        const chartTabs = document.querySelectorAll('.chart-tab');
+        chartTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs in this group
+                this.parentNode.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                // Here you would typically update the chart data based on the selected tab
+            });
+        });
+
+        // Tooltip initialization
+        const tooltips = document.querySelectorAll('.tooltip');
+        tooltips.forEach(tooltip => {
+            tooltip.addEventListener('mouseenter', function() {
+                // Modern browsers will handle the CSS tooltip
+            });
+        });
+
+        // Animate elements on scroll
+        const animateOnScroll = function() {
+            const elements = document.querySelectorAll('.stat-card, .chart-card, .activity-item, .event-item');
+            elements.forEach(element => {
+                const elementPosition = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (elementPosition < windowHeight - 100) {
+                    element.classList.add('animate__animated', 'animate__fadeInUp');
+                }
+            });
+        };
+
+        // Run once on load
+        animateOnScroll();
+        
+        // Run on scroll
+        window.addEventListener('scroll', animateOnScroll);
+    });
+</script>
+</body>
+</html>

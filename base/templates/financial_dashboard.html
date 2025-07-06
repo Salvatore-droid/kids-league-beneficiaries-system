@@ -1,0 +1,552 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --primary-light: #eef2ff;
+        --secondary: #3f37c9;
+        --accent: #4895ef;
+        --success: #4cc9f0;
+        --info: #4361ee;
+        --warning: #f8961e;
+        --danger: #f72585;
+        --dark: #1a1a2e;
+        --darker: #16213e;
+        --light: #f8f9fa;
+        --lighter: #f1f3f9;
+        --gray: #6c757d;
+        --gray-light: #e9ecef;
+        --white: #ffffff;
+        --header-height: 80px;
+        --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --border-radius: 0.375rem;
+        --border-radius-lg: 0.5rem;
+        --border-radius-xl: 1rem;
+    }
+
+    /* Financial Dashboard Specific Styles */
+    .financial-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--gray-light);
+        animation: fadeInDown 0.6s ease;
+    }
+
+    .financial-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .financial-header h1::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -2.2rem;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        border-radius: 2px;
+    }
+
+    .financial-header p {
+        color: var(--gray);
+        font-size: 0.95rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Financial Summary Cards */
+    .financial-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-card {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+        transition: var(--transition);
+    }
+
+    .summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .summary-card.income {
+        border-left: 4px solid var(--success);
+    }
+
+    .summary-card.expense {
+        border-left: 4px solid var(--danger);
+    }
+
+    .summary-card.budget {
+        border-left: 4px solid var(--primary);
+    }
+
+    .summary-card.sponsorship {
+        border-left: 4px solid var(--accent);
+    }
+
+    .summary-card h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray);
+        margin-bottom: 0.5rem;
+    }
+
+    .summary-card .amount {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .summary-card .change {
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .change.positive {
+        color: var(--success);
+    }
+
+    .change.negative {
+        color: var(--danger);
+    }
+
+    /* Charts Container */
+    .charts-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 992px) {
+        .charts-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .chart-card {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+    }
+
+    .chart-card h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--dark);
+    }
+
+    .chart-placeholder {
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--lighter);
+        border-radius: var(--border-radius);
+    }
+
+    /* Recent Transactions */
+    .recent-transactions {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .recent-transactions h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--dark);
+    }
+
+    .transaction-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .transaction-table th {
+        text-align: left;
+        padding: 0.75rem 1rem;
+        background-color: var(--lighter);
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+    .transaction-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .transaction-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .transaction-table tr:hover {
+        background-color: var(--primary-light);
+    }
+
+    .transaction-amount {
+        font-weight: 600;
+    }
+
+    .transaction-amount.income {
+        color: var(--success);
+    }
+
+    .transaction-amount.expense {
+        color: var(--danger);
+    }
+
+    .transaction-status {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-completed {
+        background-color: rgba(76, 201, 240, 0.1);
+        color: var(--success);
+    }
+
+    .status-pending {
+        background-color: rgba(248, 150, 30, 0.1);
+        color: var(--warning);
+    }
+
+    .status-failed {
+        background-color: rgba(247, 37, 133, 0.1);
+        color: var(--danger);
+    }
+
+    /* Budget Overview */
+    .budget-overview {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+    }
+
+    .budget-overview h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: var(--dark);
+    }
+
+    .budget-item {
+        margin-bottom: 1.5rem;
+    }
+
+    .budget-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .budget-title {
+        font-weight: 600;
+    }
+
+    .budget-amount {
+        font-weight: 600;
+    }
+
+    .progress-container {
+        height: 8px;
+        background-color: var(--gray-light);
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        border-radius: 4px;
+    }
+
+    .progress-safe {
+        background-color: var(--success);
+    }
+
+    .progress-warning {
+        background-color: var(--warning);
+    }
+
+    .progress-danger {
+        background-color: var(--danger);
+    }
+
+    .budget-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--gray);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .financial-summary {
+            grid-template-columns: 1fr;
+        }
+        
+        .transaction-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity:0; }
+        to { opacity:1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+    <header class="financial-header">
+        <div class="header-left">
+            <h1>Financial Dashboard</h1>
+            <p>Comprehensive overview of your organization's finances</p>
+        </div>
+        <div class="header-actions">
+            <div class="notification-btn tooltip" data-tooltip="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">{{ unread_notifications }}</span>
+            </div>
+            <div class="profile-btn">
+                <img src="{% static 'img/avatar.png' %}" alt="Profile">
+            </div>
+        </div>
+    </header>
+
+    <!-- Financial Summary Cards -->
+    <div class="financial-summary">
+        <div class="summary-card income">
+            <h3>Total Income</h3>
+            <div class="amount">$12,450.00</div>
+            <div class="change positive">
+                <i class="fas fa-arrow-up"></i> 12% from last month
+            </div>
+        </div>
+        <div class="summary-card expense">
+            <h3>Total Expenses</h3>
+            <div class="amount">$8,720.00</div>
+            <div class="change negative">
+                <i class="fas fa-arrow-down"></i> 5% from last month
+            </div>
+        </div>
+        <div class="summary-card budget">
+            <h3>Budget Utilization</h3>
+            <div class="amount">78%</div>
+            <div class="change positive">
+                <i class="fas fa-info-circle"></i> On track
+            </div>
+        </div>
+        <div class="summary-card sponsorship">
+            <h3>Sponsorship Funds</h3>
+            <div class="amount">$9,350.00</div>
+            <div class="change positive">
+                <i class="fas fa-arrow-up"></i> 8% from last month
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Container -->
+    <div class="charts-container">
+        <div class="chart-card">
+            <h3>Monthly Financial Summary</h3>
+            <div class="chart-placeholder">
+                <p>Monthly income vs. expenses chart will appear here</p>
+            </div>
+        </div>
+        <div class="chart-card">
+            <h3>Transaction Types Distribution</h3>
+            <div class="chart-placeholder">
+                <p>Transaction types pie chart will appear here</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="recent-transactions">
+        <div class="flex justify-between items-center mb-6">
+            <h3>Recent Transactions</h3>
+            <a href="{% url 'transaction_list' %}" class="btn btn-secondary">
+                <i class="fas fa-list"></i> View All Transactions
+            </a>
+        </div>
+        <table class="transaction-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in recent_transactions %}
+                <tr>
+                    <td>{{ transaction.transaction_date|date:"M d, Y" }}</td>
+                    <td>{{ transaction.description|truncatechars:40 }}</td>
+                    <td>{{ transaction.get_transaction_type_display }}</td>
+                    <td class="transaction-amount {% if transaction.transaction_type in ['sponsorship', 'donation'] %}income{% else %}expense{% endif %}">
+                        ${{ transaction.amount }}
+                    </td>
+                    <td>
+                        <span class="transaction-status status-{{ transaction.status }}">
+                            {{ transaction.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-4">No recent transactions found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Budget Overview -->
+    <div class="budget-overview">
+        <div class="flex justify-between items-center mb-6">
+            <h3>Active Budgets</h3>
+            <a href="{% url 'budget_list' %}" class="btn btn-secondary">
+                <i class="fas fa-list"></i> View All Budgets
+            </a>
+        </div>
+        
+        {% for budget in active_budgets %}
+        <div class="budget-item">
+            <div class="budget-header">
+                <div class="budget-title">{{ budget.name }}</div>
+                <div class="budget-amount">${{ budget.total_amount }}</div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar 
+                    {% if budget.spent_amount_percent < 70 %}progress-safe
+                    {% elif budget.spent_amount_percent < 90 %}progress-warning
+                    {% else %}progress-danger{% endif %}" 
+                    style="width: {{ budget.spent_amount_percent }}%">
+                </div>
+            </div>
+            <div class="budget-meta">
+                <div>Spent: ${{ budget.spent_amount }}</div>
+                <div>Remaining: ${{ budget.remaining_amount }}</div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No active budgets found</p>
+        {% endfor %}
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Initialize charts
+    document.addEventListener('DOMContentLoaded', function() {
+        // Monthly Summary Chart
+        const monthlyCtx = document.createElement('canvas');
+        document.querySelector('.chart-placeholder').replaceWith(monthlyCtx);
+        
+        new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [
+                    {
+                        label: 'Income',
+                        data: [1200, 1900, 1500, 2000, 1800, 2200, 2400, 2100, 2300, 2500, 2700, 3000],
+                        backgroundColor: 'rgba(76, 201, 240, 0.7)',
+                        borderColor: 'rgba(76, 201, 240, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Expenses',
+                        data: [800, 1200, 1000, 1500, 1300, 1800, 2000, 1700, 1900, 2100, 2300, 2500],
+                        backgroundColor: 'rgba(247, 37, 133, 0.7)',
+                        borderColor: 'rgba(247, 37, 133, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Transaction Types Chart
+        const typesCtx = document.createElement('canvas');
+        document.querySelectorAll('.chart-placeholder')[1].replaceWith(typesCtx);
+        
+        new Chart(typesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Sponsorship', 'Donations', 'Expenses', 'Refunds', 'Other'],
+                datasets: [{
+                    data: [45, 25, 20, 5, 5],
+                    backgroundColor: [
+                        'rgba(67, 97, 238, 0.7)',
+                        'rgba(76, 201, 240, 0.7)',
+                        'rgba(247, 37, 133, 0.7)',
+                        'rgba(248, 150, 30, 0.7)',
+                        'rgba(108, 117, 125, 0.7)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

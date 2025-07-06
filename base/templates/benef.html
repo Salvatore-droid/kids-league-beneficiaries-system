@@ -1,0 +1,889 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --primary-light: #eef2ff;
+        --secondary: #3f37c9;
+        --accent: #4895ef;
+        --success: #4cc9f0;
+        --info: #4361ee;
+        --warning: #f8961e;
+        --danger: #f72585;
+        --dark: #1a1a2e;
+        --darker: #16213e;
+        --light: #f8f9fa;
+        --lighter: #f1f3f9;
+        --gray: #6c757d;
+        --gray-light: #e9ecef;
+        --white: #ffffff;
+        --header-height: 80px;
+        --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --border-radius: 0.375rem;
+        --border-radius-lg: 0.5rem;
+        --border-radius-xl: 1rem;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: var(--lighter);
+        color: var(--dark);
+        overflow-x: hidden;
+        line-height: 1.6;
+    }
+
+    /* Main Content Styles */
+    .main-content {
+        flex: 1;
+        margin-left: var(--sidebar-width, 280px);
+        padding: 2rem;
+        transition: var(--transition);
+    }
+
+    /* Beneficiaries Page Specific Styles */
+    .main-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--gray-light);
+        animation: fadeInDown 0.6s ease;
+    }
+
+    .main-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .main-header h1::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -2.2rem;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        border-radius: 2px;
+    }
+
+    .main-header p {
+        color: var(--gray);
+        font-size: 0.95rem;
+        margin-top: 0.5rem;
+    }
+
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .search-bar {
+        position: relative;
+    }
+
+    .search-bar input {
+        padding: 0.6rem 1rem 0.6rem 2.75rem;
+        border-radius: 50px;
+        border: 1px solid var(--gray-light);
+        background-color: var(--white);
+        font-size: 0.925rem;
+        width: 240px;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .search-bar input:focus {
+        outline: none;
+        border-color: var(--primary-light);
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.2);
+        width: 280px;
+    }
+
+    .search-bar i {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        font-size: 0.95rem;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .notification-btn, .message-btn, .profile-btn {
+        position: relative;
+        color: var(--dark);
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: var(--transition);
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: var(--white);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .notification-btn:hover, .message-btn:hover, .profile-btn:hover {
+        color: var(--primary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: -3px;
+        right: -3px;
+        background-color: var(--danger);
+        color: var(--white);
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+        border: 2px solid var(--lighter);
+    }
+
+    .profile-btn img {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--primary-light);
+    }
+
+    /* Beneficiaries Management Section */
+    .beneficiaries-container {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.8s ease;
+    }
+
+    .beneficiaries-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .beneficiaries-header h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark);
+        position: relative;
+        padding-left: 1rem;
+    }
+
+    .beneficiaries-header h2::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(to bottom, var(--primary), var(--accent));
+        border-radius: 2px;
+    }
+
+    .beneficiaries-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.65rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-size: 0.925rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        box-shadow: var(--shadow-sm);
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: var(--white);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    .btn-secondary {
+        background-color: var(--white);
+        color: var(--primary);
+        border: 1px solid var(--primary-light);
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--primary-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    .btn i {
+        margin-right: 8px;
+        font-size: 0.9rem;
+    }
+
+    /* Filters Section */
+    .filters-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1.25rem;
+        background-color: var(--lighter);
+        border-radius: var(--border-radius);
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--dark);
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 0.65rem 1rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--gray-light);
+        background-color: var(--white);
+        font-size: 0.925rem;
+        transition: var(--transition);
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.2);
+    }
+
+    /* DataTable Customization */
+    .dataTables_wrapper {
+        width: 100%;
+    }
+
+    .dataTables_filter input {
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--gray-light);
+        font-size: 0.925rem;
+        transition: var(--transition);
+    }
+
+    .dataTables_filter input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.2);
+    }
+
+    .dataTables_length select {
+        padding: 0.4rem 1.75rem 0.4rem 1rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--gray-light);
+        font-size: 0.925rem;
+    }
+
+    .dataTables_info {
+        font-size: 0.875rem;
+        color: var(--gray);
+    }
+
+    .dataTables_paginate .paginate_button {
+        padding: 0.5rem 0.75rem;
+        margin-left: 0.25rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--gray-light);
+        font-size: 0.875rem;
+        color: var(--dark);
+        transition: var(--transition);
+    }
+
+    .dataTables_paginate .paginate_button:hover {
+        background-color: var(--primary);
+        color: var(--white) !important;
+        border-color: var(--primary);
+    }
+
+    .dataTables_paginate .paginate_button.current {
+        background-color: var(--primary);
+        color: var(--white) !important;
+        border-color: var(--primary);
+    }
+
+    table.dataTable {
+        border-collapse: collapse;
+        width: 100% !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    table.dataTable thead th {
+        padding: 1rem;
+        font-weight: 600;
+        color: var(--dark);
+        background-color: var(--lighter);
+        border-bottom: 2px solid var(--gray-light);
+        text-align: left;
+    }
+
+    table.dataTable tbody td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--gray-light);
+        vertical-align: middle;
+    }
+
+    table.dataTable tbody tr:hover {
+        background-color: var(--primary-light);
+    }
+
+    /* Student Status Badges */
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background-color: rgba(76, 201, 240, 0.1);
+        color: var(--success);
+    }
+
+    .status-inactive {
+        background-color: rgba(247, 37, 133, 0.1);
+        color: var(--danger);
+    }
+
+    .status-pending {
+        background-color: rgba(248, 150, 30, 0.1);
+        color: var(--warning);
+    }
+
+    .status-graduated {
+        background-color: rgba(67, 97, 238, 0.1);
+        color: var(--primary);
+    }
+
+    /* Student Avatar */
+    .student-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 0.75rem;
+        border: 2px solid var(--primary-light);
+    }
+
+    /* Action Buttons */
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: var(--lighter);
+        color: var(--gray);
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-right: 0.5rem;
+    }
+
+    .action-btn:hover {
+        color: var(--white);
+        transform: scale(1.1);
+    }
+
+    .action-btn.view:hover {
+        background-color: var(--primary);
+    }
+
+    .action-btn.edit:hover {
+        background-color: var(--warning);
+    }
+
+    .action-btn.delete:hover {
+        background-color: var(--danger);
+    }
+
+    /* Pagination Styles */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+
+    .page-item {
+        margin: 0 0.25rem;
+    }
+
+    .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: var(--border-radius);
+        background-color: var(--white);
+        color: var(--dark);
+        border: 1px solid var(--gray-light);
+        transition: var(--transition);
+    }
+
+    .page-link:hover {
+        background-color: var(--primary-light);
+        color: var(--primary);
+        border-color: var(--primary-light);
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary);
+        color: var(--white);
+        border-color: var(--primary);
+    }
+
+    .page-item.disabled .page-link {
+        color: var(--gray);
+        background-color: var(--lighter);
+        border-color: var(--gray-light);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .main-content {
+            margin-left: var(--sidebar-collapsed-width, 90px);
+        }
+    }
+
+    @media (max-width: 992px) {
+        .main-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+        
+        .header-right {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .search-bar input {
+            width: 200px;
+        }
+        
+        .search-bar input:focus {
+            width: 240px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .beneficiaries-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .filters-section {
+            flex-direction: column;
+        }
+        
+        table.dataTable thead {
+            display: none;
+        }
+        
+        table.dataTable tbody td {
+            display: block;
+            text-align: right;
+            padding-left: 50%;
+            position: relative;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        table.dataTable tbody td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 1rem;
+            width: calc(50% - 1rem);
+            padding-right: 1rem;
+            font-weight: 600;
+            text-align: left;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .main-content {
+            padding: 1.5rem;
+        }
+        
+        .header-right {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        .search-bar input {
+            width: 100%;
+        }
+        
+        .search-bar input:focus {
+            width: 100%;
+        }
+        
+        .header-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity:0; }
+        to { opacity:1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Utility Classes */
+    .animate-pulse {
+        animation: pulse 2s infinite;
+    }
+
+    .text-primary {
+        color: var(--primary);
+    }
+
+    .bg-primary-light {
+        background-color: var(--primary-light);
+    }
+
+    .shadow-primary {
+        box-shadow: 0 4px 20px rgba(67, 97, 238, 0.15);
+    }
+
+    /* Tooltip */
+    .tooltip {
+        position: relative;
+    }
+
+    .tooltip::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 50%;
+        bottom: 100%;
+        transform: translateX(-50%);
+        background-color: var(--dark);
+        color: var(--white);
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--border-radius);
+        font-size: 0.8rem;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+        z-index: 100;
+        margin-bottom: 10px;
+    }
+
+    .tooltip:hover::after {
+        opacity: 1;
+        visibility: visible;
+    }
+</style>
+
+    <header class="main-header">
+        <div class="header-left">
+            <h1>Beneficiaries Management</h1>
+            <p>Comprehensive overview and management of all student beneficiaries</p>
+        </div>
+        <div class="header-right">
+            <form method="GET" action="{% url 'beneficiaries_list' %}" class="search-bar">
+                <input type="text" name="search" placeholder="Search beneficiaries..." value="{{ request.GET.search }}">
+                <i class="fas fa-search"></i>
+            </form>
+            <div class="header-actions">
+                <div class="notification-btn tooltip" data-tooltip="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">{{ unread_notifications }}</span>
+                </div>
+                <div class="message-btn tooltip" data-tooltip="Messages">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="profile-btn">
+                    <img src="{% static 'img/avatar.png' %}" alt="Profile">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Beneficiaries Management Section -->
+    <section class="beneficiaries-container">
+        <div class="beneficiaries-header">
+            <h2>Student Beneficiaries</h2>
+            <div class="beneficiaries-actions">
+                <a href="{% url 'add_beneficiary' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Beneficiary
+                </a>
+                <button class="btn btn-secondary">
+                    <i class="fas fa-file-export"></i> Export Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <form method="GET" action="{% url 'beneficiaries_list' %}" class="filters-section">
+            <div class="filter-group">
+                <label for="education_level">Education Level</label>
+                <select id="education_level" name="education_level" class="filter-select">
+                    <option value="">All Levels</option>
+                    {% for level in education_levels %}
+                        <option value="{{ level.0 }}" {% if request.GET.education_level == level.0|stringformat:"s" %}selected{% endif %}>{{ level.1 }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="status">Status</label>
+                <select id="status" name="status" class="filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="graduated" {% if request.GET.status == 'graduated' %}selected{% endif %}>Graduated</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="year">Year</label>
+                <select id="year" name="year" class="filter-select">
+                    <option value="">All Years</option>
+                    {% for year in enrollment_years %}
+                        <option value="{{ year }}" {% if request.GET.year == year|stringformat:"s" %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sponsor">Sponsor</label>
+                <select id="sponsor" name="sponsor" class="filter-select">
+                    <option value="">All Sponsors</option>
+                    {% for sponsor in sponsors %}
+                        <option value="{{ sponsor.id }}" {% if request.GET.sponsor == sponsor.id|stringformat:"s" %}selected{% endif %}>{{ sponsor.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="align-self: flex-end;">Apply Filters</button>
+        </form>
+
+        <!-- Beneficiaries Table -->
+        <div class="table-responsive">
+            <table id="beneficiariesTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>ID Number</th>
+                        <th>Education Level</th>
+                        <th>Institution</th>
+                        <th>Sponsor</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for beneficiary in beneficiaries %}
+                    <tr>
+                        <td data-label="Student">
+                            <div style="display: flex; align-items: center;">
+                                <img src="{% if beneficiary.photo %}{{ beneficiary.photo.url }}{% else %}{% static 'img/default-avatar.png' %}{% endif %}" alt="Student" class="student-avatar">
+                                <div>
+                                    <div style="font-weight: 600;">{{ beneficiary.first_name }} {{ beneficiary.last_name }}</div>
+                                    <div style="font-size: 0.8rem; color: var(--gray);">{{ beneficiary.get_current_level_display }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td data-label="ID Number">{{ beneficiary.national_id }}</td>
+                        <td data-label="Education Level">{{ beneficiary.get_current_level_display }}</td>
+                        <td data-label="Institution">{% if beneficiary.institution %}{{ beneficiary.institution.name }}{% else %}--{% endif %}</td>
+                        <td data-label="Sponsor">{% if beneficiary.sponsor %}{{ beneficiary.sponsor.name }}{% else %}--{% endif %}</td>
+                        <td data-label="Status">
+                            {% if beneficiary.current_level == 'graduated' %}
+                                <span class="status-badge status-graduated">Graduated</span>
+                            {% elif not beneficiary.is_active %}
+                                <span class="status-badge status-inactive">Inactive</span>
+                            {% elif beneficiary.status == 'pending' %}
+                                <span class="status-badge status-pending">Pending</span>
+                            {% else %}
+                                <span class="status-badge status-active">Active</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Actions">
+                            <a href="{% url 'beneficiary_detail' pk=beneficiary.pk %}" class="action-btn view" title="View Profile"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'edit_beneficiary' pk=beneficiary.pk %}" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'delete_beneficiary' pk=beneficiary.pk %}" class="action-btn delete" title="Delete"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">No beneficiaries found matching your criteria.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo; First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Last &raquo;</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Messages Display -->
+    {% if messages %}
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        {% for message in messages %}
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header {% if message.tags %}{{ message.tags }}{% endif %}">
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                {{ message }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function() {
+    // Initialize DataTable with custom options
+    $('#beneficiariesTable').DataTable({
+        responsive: true,
+        searching: false, // Disable DataTable's built-in search since we have our own
+        paging: false,    // Disable DataTable's pagination since we use Django's
+        info: false,      // Disable "Showing X of Y entries" since we use Django's pagination info
+        language: {
+            emptyTable: "No beneficiaries found",
+        },
+        dom: '<"top"f>rt<"bottom"lip><"clear">',
+        initComplete: function() {
+            $('.dataTables_filter input').addClass('form-control');
+            $('.dataTables_length select').addClass('form-select');
+        }
+    });
+
+    // Submit filter form on select change
+    $('#education_level, #status, #year, #sponsor').on('change', function() {
+        $(this).closest('form').submit();
+    });
+
+    // Tooltip initialization
+    $('[title]').tooltip({
+        placement: 'top',
+        trigger: 'hover'
+    });
+
+    // Auto-dismiss messages after 5 seconds
+    setTimeout(function() {
+        $('.toast').toast('hide');
+    }, 5000);
+});
+</script>
+{% endblock %}

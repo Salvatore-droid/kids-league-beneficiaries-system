@@ -1,0 +1,1008 @@
+{% extends 'index.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* Main Content Styles - More sophisticated layout */
+    .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            transition: var(--transition);
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .main-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .main-header h1::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -1.5rem;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .main-header p {
+            color: var(--gray);
+            font-size: 0.95rem;
+            margin-top: 0rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .search-bar {
+            position: relative;
+        }
+
+        .search-bar input {
+            padding: 0.6rem 1rem 0.6rem 2.75rem;
+            border-radius: 50px;
+            border: 1px solid var(--gray-light);
+            background-color: var(--white);
+            font-size: 0.925rem;
+            width: 240px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.2);
+            width: 280px;
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .notification-btn, .message-btn, .profile-btn {
+            position: relative;
+            color: var(--dark);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .notification-btn:hover, .message-btn:hover, .profile-btn:hover {
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            background-color: var(--danger);
+            color: var(--white);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-weight: 700;
+            border: 2px solid var(--lighter);
+        }
+
+        .profile-btn img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-light);
+        }
+
+        /* Dashboard Stats - Card redesign with better visuals */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.75rem;
+            margin-bottom: 2.5rem;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .stat-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 1.75rem;
+            display: flex;
+            align-items: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+            z-index: -1;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 1.5rem;
+            margin-right: 1.25rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1);
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-info h3 {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--gray);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-number {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .stat-number span {
+            font-size: 1rem;
+            margin-left: 4px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .stat-change i {
+            margin-right: 5px;
+            font-size: 0.8rem;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* Charts Section - Enhanced with tabs and better spacing */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.75rem;
+            margin-bottom: 2.5rem;
+            animation: fadeIn 0.8s ease 0.2s both;
+        }
+
+        .chart-card {
+            background-color: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 1.75rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .chart-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .chart-header h3::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to bottom, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .chart-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background-color: var(--lighter);
+            border-radius: 50px;
+            padding: 0.25rem;
+        }
+
+        .chart-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            background-color: transparent;
+            color: var(--gray);
+        }
+
+        .chart-tab.active {
+            background-color: var(--white);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        /* Bottom Section - Improved layout and interactions */
+        .bottom-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.75rem;
+            animation: fadeIn 0.8s ease 0.4s both;
+        }
+
+        .recent-activity, .quick-actions, .upcoming-events {
+            background-color: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 1.75rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .recent-activity:hover, .quick-actions:hover, .upcoming-events:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.75rem;
+        }
+
+        .section-header h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark);
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .section-header h3::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to bottom, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+
+        .view-all {
+            font-size: 0.9rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .view-all i {
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .view-all:hover {
+            color: var(--primary-dark);
+        }
+
+        .view-all:hover i {
+            transform: translateX(3px);
+        }
+
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 1.25rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px dashed var(--gray-light);
+            position: relative;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .activity-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.15);
+            transition: var(--transition);
+        }
+
+        .activity-item:hover .activity-icon {
+            transform: rotate(10deg) scale(1.1);
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-content p {
+            font-size: 0.95rem;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .activity-content p strong {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .activity-time i {
+            font-size: 0.7rem;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.75rem 1rem;
+            background-color: var(--lighter);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            text-decoration: none;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            z-index: -1;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            color: var(--white);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2);
+        }
+
+        .action-btn:hover::before {
+            opacity: 1;
+        }
+
+        .action-btn i {
+            font-size: 1.75rem;
+            margin-bottom: 12px;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover i {
+            transform: scale(1.2);
+        }
+
+        .action-btn span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        /* Upcoming Events */
+        .event-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .event-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            background-color: var(--lighter);
+            transition: var(--transition);
+            animation: fadeIn 0.6s ease;
+        }
+
+        .event-item:hover {
+            background-color: var(--primary-light);
+            transform: translateX(5px);
+        }
+
+        .event-date {
+            width: 50px;
+            height: 50px;
+            border-radius: var(--border-radius);
+            background-color: var(--white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .event-day {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .event-month {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--gray);
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .event-details {
+            flex: 1;
+        }
+
+        .event-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 3px;
+        }
+
+        .event-time {
+            font-size: 0.85rem;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .event-time i {
+            font-size: 0.8rem;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .event-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--white);
+            color: var(--gray);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .event-btn:hover {
+            color: var(--white);
+            transform: scale(1.1);
+        }
+
+        .event-btn.remind:hover {
+            background-color: var(--warning);
+        }
+
+        .event-btn.view:hover {
+            background-color: var(--primary);
+        }
+</style>
+
+<header class="main-header">
+    <div class="header-left">
+        <h1>Dashboard Overview</h1>
+        <p>Welcome back, {{ request.user.username }}! Here's what's happening with your beneficiaries today.</p>
+    </div>
+    <div class="header-right">
+        <div class="search-bar">
+            <input type="text" placeholder="Search students, schools...">
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="header-actions">
+            <div class="notification-btn tooltip" data-tooltip="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">{{ unread_notifications }}</span>
+            </div>
+            <div class="message-btn tooltip" data-tooltip="Messages">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="profile-btn">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="Profile picture">
+                {% else %}
+                    <img src="{% static 'images/avatar.png' %}" alt="Default profile picture">
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Enhanced Dashboard Stats -->
+<section class="dashboard-stats">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #4361ee 0%, #3a56d4 100%);">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+        <div class="stat-info">
+            <h3>Active Beneficiaries</h3>
+            <p class="stat-number">{{ total_beneficiaries }} <span>students</span></p>
+            <p class="stat-change positive">
+                <i class="fas fa-arrow-up"></i> 8.5% from last term
+            </p>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #3f37c9 0%, #4cc9f0 100%);">
+            <i class="fas fa-school"></i>
+        </div>
+        <div class="stat-info">
+            <h3>Partner Institutions</h3>
+            <p class="stat-number">{{ total_institutions }} <span>schools</span></p>
+            <p class="stat-change positive">
+                <i class="fas fa-arrow-up"></i> 3 new this quarter
+            </p>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #4895ef 0%, #4cc9f0 100%);">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div class="stat-info">
+            <h3>Graduation Rate</h3>
+            <p class="stat-number">{{ graduation_rate }}<span>%</span></p>
+            <p class="stat-change positive">
+                <i class="fas fa-arrow-up"></i> 4% improvement
+            </p>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: linear-gradient(135deg, #f72585 0%, #f8961e 100%);">
+            <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="stat-info">
+            <h3>Annual Budget</h3>
+            <p class="stat-number">KES {{ total_payments|floatformat:"0" }}<span>M</span></p>
+            <p class="stat-change negative">
+                <i class="fas fa-arrow-down"></i> 12% utilization
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Enhanced Charts Section -->
+<section class="charts-section">
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3>Beneficiary Distribution</h3>
+            <div class="chart-tabs">
+                <button class="chart-tab active">Levels</button>
+                <button class="chart-tab">Gender</button>
+                <button class="chart-tab">Regions</button>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="levelDistributionChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3>Academic Performance</h3>
+            <div class="chart-tabs">
+                <button class="chart-tab active">Term 1</button>
+                <button class="chart-tab">Term 2</button>
+                <button class="chart-tab">Term 3</button>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="performanceTrendChart"></canvas>
+        </div>
+    </div>
+</section>
+
+<!-- Enhanced Bottom Section -->
+<section class="bottom-section">
+    <div class="recent-activity">
+        <div class="section-header">
+            <h3>Recent Activities</h3>
+            <a href="#" class="view-all">
+                View All
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+        <div class="activity-list">
+            {% for activity in recent_activities %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    {% if activity.activity_type == 'enrollment' %}
+                        <i class="fas fa-user-plus"></i>
+                    {% elif activity.activity_type == 'payment' %}
+                        <i class="fas fa-money-bill-wave"></i>
+                    {% elif activity.activity_type == 'performance' %}
+                        <i class="fas fa-award"></i>
+                    {% elif activity.activity_type == 'meeting' %}
+                        <i class="fas fa-users"></i>
+                    {% elif activity.activity_type == 'training' %}
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    {% else %}
+                        <i class="fas fa-tasks"></i>
+                    {% endif %}
+                </div>
+                <div class="activity-content">
+                    <p>{{ activity.description }}</p>
+                    <span class="activity-time">
+                        <i class="far fa-clock"></i> {{ activity.date_recorded|timesince }} ago
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="activity-content">
+                    <p>No recent activities to display</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div class="quick-actions">
+        <div class="section-header">
+            <h3>Quick Actions</h3>
+        </div>
+        <div class="action-buttons">
+            <a href="#" class="action-btn">
+                <i class="fas fa-user-plus"></i>
+                <span>Enroll New Student</span>
+            </a>
+            <a href="#" class="action-btn">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Process Payment</span>
+            </a>
+            <a href="#" class="action-btn">
+                <i class="fas fa-chart-line"></i>
+                <span>Generate Report</span>
+            </a>
+            <a href="#" class="action-btn">
+                <i class="fas fa-envelope"></i>
+                <span>Send Announcement</span>
+            </a>
+            <a href="#" class="action-btn">
+                <i class="fas fa-calendar-check"></i>
+                <span>Schedule Meeting</span>
+            </a>
+            <a href="#" class="action-btn">
+                <i class="fas fa-school"></i>
+                <span>Add Institution</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="upcoming-events">
+        <div class="section-header">
+            <h3>Upcoming Events</h3>
+            <a href="#" class="view-all">
+                View All
+                <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+        <div class="event-list">
+            {% for event in upcoming_events %}
+            <div class="event-item">
+                <div class="event-date">
+                    <div class="event-day">{{ event.start_date|date:"d" }}</div>
+                    <div class="event-month">{{ event.start_date|date:"M"|upper }}</div>
+                </div>
+                <div class="event-details">
+                    <div class="event-title">{{ event.title }}</div>
+                    <div class="event-time">
+                        <i class="far fa-clock"></i> 
+                        {{ event.start_date|time }} - {{ event.end_date|time }}
+                    </div>
+                </div>
+                <div class="event-actions">
+                    <button class="event-btn remind" title="Set Reminder">
+                        <i class="far fa-bell"></i>
+                    </button>
+                    <a href="{% url 'event_detail' event.id %}" class="event-btn view" title="View Details">
+                        <i class="far fa-eye"></i>
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="event-item">
+                <div class="event-details">
+                    <div class="event-title">No upcoming events</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Beneficiary Distribution Chart
+    const levelCtx = document.getElementById('levelDistributionChart').getContext('2d');
+    
+    // Prepare data from Django context
+    const levelData = {
+        {% for item in beneficiaries_by_level %}
+            '{{ item.current_level|title }}': {{ item.count }},
+        {% endfor %}
+    };
+    
+    const genderData = {
+        {% for item in beneficiaries_by_gender %}
+            '{{ item.get_gender_display }}': {{ item.count }},
+        {% endfor %}
+    };
+    
+    new Chart(levelCtx, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(levelData),
+            datasets: [{
+                data: Object.values(levelData),
+                backgroundColor: [
+                    '#4361ee',
+                    '#3f37c9',
+                    '#4895ef',
+                    '#4cc9f0',
+                    '#f72585'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+
+    // Performance Trend Chart
+    const performanceCtx = document.getElementById('performanceTrendChart').getContext('2d');
+    
+    // This would ideally come from an API call with real data
+    // For now, we'll use placeholder data
+    new Chart(performanceCtx, {
+        type: 'line',
+        data: {
+            labels: ['Term 1 2022', 'Term 2 2022', 'Term 3 2022', 'Term 1 2023', 'Term 2 2023', 'Term 3 2023'],
+            datasets: [{
+                label: 'Average Score',
+                data: [72, 75, 78, 80, 82, 85],
+                backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                borderColor: '#4361ee',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 50,
+                    max: 100
+                }
+            }
+        }
+    });
+
+    // Tab switching for charts
+    document.querySelectorAll('.chart-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabContainer = this.closest('.chart-tabs');
+            tabContainer.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            // You would add logic here to update the chart data based on the selected tab
+            // For example, making an API call to get the relevant data
+        });
+    });
+
+    // AJAX for beneficiary distribution tabs
+    document.querySelectorAll('.chart-card:nth-child(1) .chart-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabType = this.textContent.toLowerCase();
+            fetch(`/api/beneficiary-distribution/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update chart based on selected tab
+                    const chart = Chart.getChart(levelCtx);
+                    if (tabType === 'levels') {
+                        chart.data.labels = Object.keys(levelData);
+                        chart.data.datasets[0].data = Object.values(levelData);
+                    } else if (tabType === 'gender') {
+                        chart.data.labels = Object.keys(genderData);
+                        chart.data.datasets[0].data = Object.values(genderData);
+                    }
+                    chart.update();
+                });
+        });
+    });
+
+    // AJAX for performance trends tabs
+    document.querySelectorAll('.chart-card:nth-child(2) .chart-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const term = this.textContent.split(' ')[1];
+            fetch(`/api/performance-trends/?term=${term}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update chart with new data
+                    const chart = Chart.getChart(performanceCtx);
+                    // This would be replaced with actual data handling
+                    chart.update();
+                });
+        });
+    });
+});
+</script>
+
+{% endblock %}

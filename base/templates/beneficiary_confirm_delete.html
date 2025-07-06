@@ -1,0 +1,386 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --primary: #4361ee;
+        --primary-dark: #3a56d4;
+        --primary-light: #eef2ff;
+        --secondary: #3f37c9;
+        --accent: #4895ef;
+        --success: #4cc9f0;
+        --info: #4361ee;
+        --warning: #f8961e;
+        --danger: #f72585;
+        --dark: #1a1a2e;
+        --darker: #16213e;
+        --light: #f8f9fa;
+        --lighter: #f1f3f9;
+        --gray: #6c757d;
+        --gray-light: #e9ecef;
+        --white: #ffffff;
+        --header-height: 80px;
+        --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --border-radius: 0.375rem;
+        --border-radius-lg: 0.5rem;
+        --border-radius-xl: 1rem;
+    }
+
+    /* Main Content Styles */
+    .main-content {
+        flex: 1;
+        margin-left: var(--sidebar-width, 280px);
+        padding: 2rem;
+        transition: var(--transition);
+    }
+
+    /* Confirmation Header */
+    .confirmation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--gray-light);
+        animation: fadeInDown 0.6s ease;
+    }
+
+    .confirmation-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .confirmation-header h1::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -2.2rem;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--danger), var(--warning));
+        border-radius: 2px;
+    }
+
+    /* Confirmation Container */
+    .confirmation-container {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        padding: 2rem;
+        margin: 0 auto;
+        max-width: 800px;
+        animation: fadeIn 0.8s ease;
+        border-left: 4px solid var(--danger);
+    }
+
+    /* Warning Alert */
+    .warning-alert {
+        display: flex;
+        align-items: flex-start;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        background-color: rgba(247, 37, 133, 0.05);
+        border: 1px solid rgba(247, 37, 133, 0.2);
+        border-radius: var(--border-radius);
+    }
+
+    .warning-alert-icon {
+        font-size: 1.5rem;
+        color: var(--danger);
+        margin-right: 1rem;
+        margin-top: 0.25rem;
+    }
+
+    .warning-alert-content h3 {
+        color: var(--danger);
+        margin-bottom: 0.5rem;
+    }
+
+    .warning-alert-content p {
+        color: var(--dark);
+    }
+
+    /* Beneficiary Summary */
+    .beneficiary-summary {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background-color: var(--lighter);
+        border-radius: var(--border-radius);
+    }
+
+    .beneficiary-photo {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--primary-light);
+    }
+
+    .beneficiary-details h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+    }
+
+    .beneficiary-details p {
+        color: var(--gray);
+        margin-bottom: 0.5rem;
+    }
+
+    .beneficiary-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-active {
+        background-color: rgba(76, 201, 240, 0.1);
+        color: var(--success);
+    }
+
+    .status-inactive {
+        background-color: rgba(247, 37, 133, 0.1);
+        color: var(--danger);
+    }
+
+    /* Impact Section */
+    .impact-section {
+        margin-bottom: 2rem;
+    }
+
+    .impact-section h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: var(--dark);
+    }
+
+    .impact-list {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .impact-list li {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+        padding-left: 1.5rem;
+        position: relative;
+        color: var(--dark);
+    }
+
+    .impact-list li::before {
+        content: '•';
+        position: absolute;
+        left: 0;
+        color: var(--danger);
+        font-size: 1.5rem;
+        line-height: 1;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--gray-light);
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-size: 0.925rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        box-shadow: var(--shadow-sm);
+        text-decoration: none;
+    }
+
+    .btn-danger {
+        background-color: var(--danger);
+        color: var(--white);
+    }
+
+    .btn-danger:hover {
+        background-color: #e51779;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    .btn-secondary {
+        background-color: var(--white);
+        color: var(--primary);
+        border: 1px solid var(--primary-light);
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--primary-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    .btn i {
+        margin-right: 8px;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .beneficiary-summary {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .form-actions .btn {
+            width: 100%;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity:0; }
+        to { opacity:1; }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(247, 37, 133, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(247, 37, 133, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(247, 37, 133, 0); }
+    }
+
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+</style>
+
+    <header class="confirmation-header">
+        <div>
+            <h1>Deactivate Beneficiary</h1>
+            <p>Confirm deactivation of this beneficiary record</p>
+        </div>
+        <div class="header-actions">
+            <div class="notification-btn tooltip" data-tooltip="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">{{ unread_notifications }}</span>
+            </div>
+            <div class="profile-btn">
+                <img src="{% static 'img/avatar.png' %}" alt="Profile">
+            </div>
+        </div>
+    </header>
+
+    <!-- Confirmation Container -->
+    <div class="confirmation-container">
+        <!-- Warning Alert -->
+        <div class="warning-alert">
+            <div class="warning-alert-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="warning-alert-content">
+                <h3>Important Notice</h3>
+                <p>Deactivating a beneficiary will mark them as inactive in the system. Their record will be preserved but they will no longer appear in active beneficiary lists. This action cannot be undone.</p>
+            </div>
+        </div>
+
+        <!-- Beneficiary Summary -->
+        <div class="beneficiary-summary">
+            <img src="{% if beneficiary.photo %}{{ beneficiary.photo.url }}{% else %}{% static 'img/default-avatar.png' %}{% endif %}" 
+                 alt="{{ beneficiary.first_name }} {{ beneficiary.last_name }}" 
+                 class="beneficiary-photo">
+            <div class="beneficiary-details">
+                <h3>{{ beneficiary.first_name }} {{ beneficiary.last_name }}</h3>
+                <p>ID: {{ beneficiary.national_id }}</p>
+                <p>Education Level: {{ beneficiary.get_current_level_display }}</p>
+                <span class="beneficiary-status 
+                    {% if beneficiary.current_level == 'graduated' %}status-graduated
+                    {% elif not beneficiary.is_active %}status-inactive
+                    {% elif beneficiary.status == 'pending' %}status-pending
+                    {% else %}status-active{% endif %}">
+                    {% if beneficiary.current_level == 'graduated' %}Graduated
+                    {% elif not beneficiary.is_active %}Inactive
+                    {% elif beneficiary.status == 'pending' %}Pending
+                    {% else %}Active{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- Impact Section -->
+        <div class="impact-section">
+            <h3>What will happen if you proceed:</h3>
+            <ul class="impact-list">
+                <li>The beneficiary will be marked as inactive in all reports and dashboards</li>
+                <li>All associated sponsorship payments will be stopped</li>
+                <li>Academic records will be preserved but marked as inactive</li>
+                <li>The record can be reactivated later if needed</li>
+            </ul>
+        </div>
+
+        <!-- Form Actions -->
+        <form method="POST" class="form-actions">
+            {% csrf_token %}
+            <a href="{% url 'beneficiary_detail' pk=beneficiary.pk %}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-danger pulse">
+                <i class="fas fa-user-slash"></i> Confirm Deactivation
+            </button>
+        </form>
+    </div>
+
+<script>
+    // Confirmation dialog enhancement
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!confirm('Are you absolutely sure you want to deactivate this beneficiary? This action cannot be undone.')) {
+            e.preventDefault();
+        }
+    });
+
+    // Add visual feedback for dangerous action
+    const confirmButton = document.querySelector('.btn-danger');
+    if (confirmButton) {
+        confirmButton.addEventListener('mouseover', function() {
+            this.classList.add('animate-pulse');
+        });
+        
+        confirmButton.addEventListener('mouseout', function() {
+            this.classList.remove('animate-pulse');
+        });
+    }
+</script>
+{% endblock %}

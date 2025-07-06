@@ -22,4 +22,9 @@ urlpatterns = [
     path('financial/aid/<int:pk>/', views.financial_aid_detail, name='financial_aid_detail'),
     path('financial/aid/<int:pk>/update-status/', views.update_financial_aid_status, name='update_financial_aid_status'),
     path('financial/reports/', views.financial_reports, name='financial_reports'),
+
+
+    path('performance/', views.performance_dashboard, name='performance_dashboard'),
+    path('performance/api/', views.performance_data_api, name='performance_data_api'),
+    path('performance/export/', views.export_performance_report, name='export_performance_report'),
 ]

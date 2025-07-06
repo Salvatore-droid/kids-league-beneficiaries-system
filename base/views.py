@@ -643,3 +643,160 @@ def financial_reports(request):
         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
     }
     return render(request, 'financial_reports.html', context)
+
+
+# Add to views.py
+
+from django.db.models import Avg, Max, Min, Count, Q
+from django.http import JsonResponse
+from datetime import datetime
+
+@login_required
+def performance_dashboard(request):
+    # Get filter parameters
+    education_level = request.GET.get('education_level', '')
+    term = request.GET.get('term', '')
+    year = request.GET.get('year', datetime.now().year)
+    subject = request.GET.get('subject', '')
+    
+    # Base queryset
+    performances = AcademicPerformance.objects.all()
+    subject_performances = SubjectPerformance.objects.all()
+    
+    # Apply filters
+    if education_level:
+        performances = performances.filter(beneficiary__current_level=education_level)
+        subject_performances = subject_performances.filter(beneficiary__current_level=education_level)
+    
+    if term:
+        performances = performances.filter(term=term)
+        subject_performances = subject_performances.filter(term=term)
+    
+    if year:
+        performances = performances.filter(academic_year=year)
+        subject_performances = subject_performances.filter(academic_year=year)
+    
+    if subject:
+        subject_performances = subject_performances.filter(subject_id=subject)
+    
+    # Calculate metrics
+    avg_score = performances.aggregate(avg=Avg('average_score'))['avg'] or 0
+    top_score = performances.aggregate(max=Max('average_score'))['max'] or 0
+    passing_rate = performances.filter(average_score__gte=50).count() / performances.count() * 100 if performances.count() > 0 else 0
+    
+    # Get top performers
+    top_performers = performances.select_related('beneficiary').order_by('-average_score')[:5]
+    
+    # Get subject averages
+    subject_averages = subject_performances.values(
+        'subject__name'
+    ).annotate(
+        avg_score=Avg('score'),
+        count=Count('id')
+    ).order_by('-avg_score')
+    
+    # Get performance trends
+    performance_trends = performances.values(
+        'term', 'academic_year'
+    ).annotate(
+        avg_score=Avg('average_score')
+    ).order_by('academic_year', 'term')
+    
+    context = {
+        'education_levels': Beneficiary.LEVEL_CHOICES,
+        'subjects': Subject.objects.all(),
+        'selected_level': education_level,
+        'selected_term': term,
+        'selected_year': year,
+        'selected_subject': subject,
+        
+        # Metrics
+        'avg_score': avg_score,
+        'top_score': top_score,
+        'passing_rate': passing_rate,
+        
+        # Data for charts
+        'top_performers': top_performers,
+        'subject_averages': subject_averages,
+        'performance_trends': list(performance_trends),
+        
+        'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
+    }
+    
+    return render(request, 'performance_dashboard.html', context)
+
+@login_required
+def performance_data_api(request):
+    # API endpoint for AJAX requests
+    education_level = request.GET.get('education_level', '')
+    term = request.GET.get('term', '')
+    year = request.GET.get('year', '')
+    subject = request.GET.get('subject', '')
+    data_type = request.GET.get('type', 'trend')
+    
+    if data_type == 'trend':
+        # Return performance trend data
+        performances = AcademicPerformance.objects.all()
+        
+        if education_level:
+            performances = performances.filter(beneficiary__current_level=education_level)
+        if term:
+            performances = performances.filter(term=term)
+        if year:
+            performances = performances.filter(academic_year=year)
+        
+        data = performances.values(
+            'term', 'academic_year'
+        ).annotate(
+            avg_score=Avg('average_score')
+        ).order_by('academic_year', 'term')
+        
+        return JsonResponse({'data': list(data)})
+    
+    elif data_type == 'subject':
+        # Return subject performance data
+        performances = SubjectPerformance.objects.all()
+        
+        if education_level:
+            performances = performances.filter(beneficiary__current_level=education_level)
+        if term:
+            performances = performances.filter(term=term)
+        if year:
+            performances = performances.filter(academic_year=year)
+        if subject:
+            performances = performances.filter(subject_id=subject)
+        
+        data = performances.values(
+            'subject__name'
+        ).annotate(
+            avg_score=Avg('score'),
+            count=Count('id')
+        ).order_by('-avg_score')
+        
+        return JsonResponse({'data': list(data)})
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@login_required
+def export_performance_report(request):
+    if request.method == 'POST':
+        report_type = request.POST.get('report_type')
+        academic_year = request.POST.get('academic_year')
+        term = request.POST.get('term', '')
+        education_level = request.POST.get('education_level', '')
+        
+        # In a real implementation, this would generate a PDF/Excel report
+        # For now, we'll just create a record and return a success message
+        
+        report = PerformanceReport.objects.create(
+            title=f"{report_type.capitalize()} Report - {academic_year} {term}",
+            report_type=report_type,
+            academic_year=academic_year,
+            term=term if term else None,
+            generated_by=request.user
+        )
+        
+        messages.success(request, f"Report generated successfully (ID: {report.id})")
+        return redirect('performance_dashboard')
+    
+    return redirect('performance_dashboard')

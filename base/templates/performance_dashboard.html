@@ -1,0 +1,921 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<style>
+    /* Performance Analytics Page Specific Styles */
+    .analytics-container {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.8s ease;
+    }
+
+    .analytics-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .analytics-header h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark);
+        position: relative;
+        padding-left: 1rem;
+    }
+
+    .analytics-header h2::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(to bottom, var(--primary), var(--accent));
+        border-radius: 2px;
+    }
+
+    .analytics-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.65rem 1.25rem;
+        border-radius: var(--border-radius);
+        font-size: 0.925rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: var(--white);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    .btn-secondary {
+        background-color: var(--white);
+        color: var(--primary);
+        border: 1px solid var(--primary-light);
+    }
+
+    .btn-secondary:hover {
+        background-color: var(--primary-light);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+    }
+
+    .btn i {
+        margin-right: 8px;
+        font-size: 0.9rem;
+    }
+
+    /* Filters Section */
+    .filters-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1.25rem;
+        background-color: var(--lighter);
+        border-radius: var(--border-radius);
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--dark);
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 0.65rem 1rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--gray-light);
+        background-color: var(--white);
+        font-size: 0.925rem;
+        transition: var(--transition);
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.2);
+    }
+
+    /* Performance Metrics Cards */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .metric-card {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+        z-index: -1;
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .metric-card:hover::before {
+        opacity: 1;
+    }
+
+    .metric-title {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--gray);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .metric-title i {
+        margin-right: 8px;
+        font-size: 1rem;
+    }
+
+    .metric-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-change {
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+    }
+
+    .metric-change i {
+        margin-right: 5px;
+        font-size: 0.8rem;
+    }
+
+    .metric-change.positive {
+        color: var(--success);
+    }
+
+    .metric-change.negative {
+        color: var(--danger);
+    }
+
+    /* Charts Section */
+    .charts-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 1.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-card {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        padding: 1.75rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+    }
+
+    .chart-card:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-header h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark);
+        position: relative;
+        padding-left: 1rem;
+    }
+
+    .chart-header h3::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 20px;
+        background: linear-gradient(to bottom, var(--primary), var(--accent));
+        border-radius: 2px;
+    }
+
+    .chart-tabs {
+        display: flex;
+        gap: 0.5rem;
+        background-color: var(--lighter);
+        border-radius: 50px;
+        padding: 0.25rem;
+    }
+
+    .chart-tab {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        background-color: transparent;
+        color: var(--gray);
+    }
+
+    .chart-tab.active {
+        background-color: var(--white);
+        color: var(--primary);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .chart-container {
+        position: relative;
+        height: 320px;
+        width: 100%;
+    }
+
+    /* Performance Table */
+    .performance-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 2rem;
+    }
+
+    .performance-table thead th {
+        padding: 1rem;
+        font-weight: 600;
+        color: var(--dark);
+        background-color: var(--lighter);
+        border-bottom: 2px solid var(--gray-light);
+        text-align: left;
+    }
+
+    .performance-table tbody td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--gray-light);
+        vertical-align: middle;
+    }
+
+    .performance-table tbody tr:hover {
+        background-color: var(--primary-light);
+    }
+
+    /* Student Avatar */
+    .student-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 0.75rem;
+        border: 2px solid var(--primary-light);
+    }
+
+    /* Performance Score */
+    .performance-score {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .score-excellent {
+        background-color: rgba(76, 201, 240, 0.1);
+        color: var(--success);
+    }
+
+    .score-good {
+        background-color: rgba(67, 97, 238, 0.1);
+        color: var(--primary);
+    }
+
+    .score-average {
+        background-color: rgba(248, 150, 30, 0.1);
+        color: var(--warning);
+    }
+
+    .score-poor {
+        background-color: rgba(247, 37, 133, 0.1);
+        color: var(--danger);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .charts-section {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .metrics-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .filters-section {
+            flex-direction: column;
+        }
+        
+        .performance-table {
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<header class="main-header">
+    <div class="header-left">
+        <h1>Performance Analytics</h1>
+        <p>Track and analyze student academic performance across all levels</p>
+    </div>
+    <div class="header-right">
+        <div class="search-bar">
+            <input type="text" placeholder="Search students, subjects...">
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="header-actions">
+            <div class="notification-btn tooltip" data-tooltip="Notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">{{ unread_notifications }}</span>
+            </div>
+            <div class="message-btn tooltip" data-tooltip="Messages">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <div class="profile-btn">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="Profile">
+                {% else %}
+                    <img src="{% static 'images/avatar.png' %}" alt="Profile">
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Performance Analytics Section -->
+<section class="analytics-container">
+    <div class="analytics-header">
+        <h2>Academic Performance Overview</h2>
+        <div class="analytics-actions">
+            <button class="btn btn-primary" id="exportReportBtn">
+                <i class="fas fa-file-export"></i> Export Report
+            </button>
+            <button class="btn btn-secondary" id="advancedFiltersBtn">
+                <i class="fas fa-filter"></i> Advanced Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <div class="filter-group">
+            <label for="education-level">Education Level</label>
+            <select id="education-level" class="filter-select">
+                <option value="">All Levels</option>
+                {% for level in education_levels %}
+                    <option value="{{ level.0 }}" {% if selected_level == level.0 %}selected{% endif %}>{{ level.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="term">Term</label>
+            <select id="term" class="filter-select">
+                <option value="">All Terms</option>
+                <option value="term1" {% if selected_term == 'term1' %}selected{% endif %}>Term 1</option>
+                <option value="term2" {% if selected_term == 'term2' %}selected{% endif %}>Term 2</option>
+                <option value="term3" {% if selected_term == 'term3' %}selected{% endif %}>Term 3</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="year">Academic Year</label>
+            <select id="year" class="filter-select">
+                {% for y in range(2020, 2024) %}
+                    <option value="{{ y }}" {% if selected_year == y|string %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="subject">Subject</label>
+            <select id="subject" class="filter-select">
+                <option value="">All Subjects</option>
+                {% for subject in subjects %}
+                    <option value="{{ subject.id }}" {% if selected_subject == subject.id|string %}selected{% endif %}>{{ subject.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-title">
+                <i class="fas fa-graduation-cap"></i> Average Score
+            </div>
+            <div class="metric-value">{{ avg_score|floatformat:1 }}%</div>
+            <div class="metric-change positive">
+                <i class="fas fa-arrow-up"></i> 3.2% from last term
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">
+                <i class="fas fa-medal"></i> Top Score
+            </div>
+            <div class="metric-value">{{ top_score|floatformat:1 }}%</div>
+            <div class="metric-value" style="font-size: 1rem;">
+                {% if top_performers.0 %}
+                    {{ top_performers.0.beneficiary.full_name }} ({{ top_performers.0.beneficiary.current_level }})
+                {% else %}
+                    No data
+                {% endif %}
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">
+                <i class="fas fa-chart-line"></i> Improvement Rate
+            </div>
+            <div class="metric-value">72.4%</div>
+            <div class="metric-change positive">
+                <i class="fas fa-arrow-up"></i> 8.1% from last term
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">
+                <i class="fas fa-user-graduate"></i> Passing Rate
+            </div>
+            <div class="metric-value">{{ passing_rate|floatformat:1 }}%</div>
+            <div class="metric-change positive">
+                <i class="fas fa-arrow-up"></i> 2.7% from last term
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Performance Trend</h3>
+                <div class="chart-tabs">
+                    <button class="chart-tab active">By Term</button>
+                    <button class="chart-tab">By Subject</button>
+                    <button class="chart-tab">By Level</button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="performanceTrendChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Subject Performance</h3>
+                <div class="chart-tabs">
+                    <button class="chart-tab active">Primary</button>
+                    <button class="chart-tab">Secondary</button>
+                    <button class="chart-tab">All</button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="subjectPerformanceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performers Table -->
+    <div class="chart-header" style="margin-top: 2rem;">
+        <h3>Top Performers</h3>
+        <a href="#" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+            View All <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+    <table class="performance-table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Level</th>
+                <th>Institution</th>
+                <th>Average Score</th>
+                <th>Improvement</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for performer in top_performers %}
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center;">
+                        {% if performer.beneficiary.photo %}
+                            <img src="{{ performer.beneficiary.photo.url }}" alt="Student" class="student-avatar">
+                        {% else %}
+                            <img src="{% static 'images/avatar.png' %}" alt="Student" class="student-avatar">
+                        {% endif %}
+                        <div>
+                            <div style="font-weight: 600;">{{ performer.beneficiary.full_name }}</div>
+                            <div style="font-size: 0.8rem; color: var(--gray);">KLK-{{ performer.beneficiary.id }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ performer.beneficiary.get_current_level_display }}</td>
+                <td>{{ performer.beneficiary.institution.name|default:"-" }}</td>
+                <td>
+                    <span class="performance-score 
+                        {% if performer.average_score >= 85 %}score-excellent
+                        {% elif performer.average_score >= 70 %}score-good
+                        {% elif performer.average_score >= 50 %}score-average
+                        {% else %}score-poor{% endif %}">
+                        {{ performer.average_score|floatformat:1 }}%
+                    </span>
+                </td>
+                <td>
+                    <span class="metric-change positive">
+                        <i class="fas fa-arrow-up"></i> {{ performer.average_score|add:"-70"|floatformat:1 }}%
+                    </span>
+                </td>
+                <td>
+                    <button class="action-btn view" title="View Performance"><i class="fas fa-eye"></i></button>
+                    <button class="action-btn edit" title="Add Note"><i class="fas fa-edit"></i></button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center;">No performance data available</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<!-- Export Report Modal -->
+<div class="modal fade" id="exportReportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Performance Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'export_performance_report' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="reportType" class="form-label">Report Type</label>
+                        <select class="form-select" id="reportType" name="report_type" required>
+                            <option value="term">Term Report</option>
+                            <option value="annual">Annual Report</option>
+                            <option value="subject">Subject Analysis</option>
+                            <option value="comparative">Comparative Analysis</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reportYear" class="form-label">Academic Year</label>
+                        <select class="form-select" id="reportYear" name="academic_year" required>
+                            {% for y in range(2020, 2024) %}
+                                <option value="{{ y }}" {% if selected_year == y|string %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3" id="termSelectContainer">
+                        <label for="reportTerm" class="form-label">Term</label>
+                        <select class="form-select" id="reportTerm" name="term">
+                            <option value="term1">Term 1</option>
+                            <option value="term2">Term 2</option>
+                            <option value="term3">Term 3</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reportFormat" class="form-label">Format</label>
+                        <select class="form-select" id="reportFormat" disabled>
+                            <option>PDF (Default)</option>
+                            <option>Excel</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize charts
+        const trendCtx = document.getElementById('performanceTrendChart').getContext('2d');
+        const subjectCtx = document.getElementById('subjectPerformanceChart').getContext('2d');
+        
+        // Performance Trend Chart
+        const trendChart = new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: [
+                    {% for trend in performance_trends %}
+                        '{{ trend.term|title }} {{ trend.academic_year }}'{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Average Score',
+                    data: [
+                        {% for trend in performance_trends %}
+                            {{ trend.avg_score|default:0 }}{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    borderColor: '#4361ee',
+                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                    tension: 0.3,
+                    fill: true,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#4361ee',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        align: 'end',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.raw.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: false,
+                        min: 0,
+                        max: 100,
+                        grid: {
+                            drawBorder: false
+                        },
+                        ticks: {
+                            stepSize: 10,
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+
+        // Subject Performance Chart
+        const subjectChart = new Chart(subjectCtx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    {% for subject in subject_averages %}
+                        '{{ subject.subject__name }}'{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Average Score',
+                    data: [
+                        {% for subject in subject_averages %}
+                            {{ subject.avg_score|default:0 }}{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    backgroundColor: [
+                        '#4361ee', '#3f37c9', '#4895ef', '#4cc9f0', '#f72585'
+                    ],
+                    borderColor: [
+                        '#4361ee', '#3f37c9', '#4895ef', '#4cc9f0', '#f72585'
+                    ],
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            drawBorder: false
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Filter functionality
+        const filters = ['education-level', 'term', 'year', 'subject'];
+        filters.forEach(filterId => {
+            document.getElementById(filterId).addEventListener('change', function() {
+                const params = new URLSearchParams();
+                filters.forEach(id => {
+                    const value = document.getElementById(id).value;
+                    if (value) params.set(id, value);
+                });
+                window.location.search = params.toString();
+            });
+        });
+
+        // Export report button
+        document.getElementById('exportReportBtn').addEventListener('click', function() {
+            const modal = new bootstrap.Modal(document.getElementById('exportReportModal'));
+            modal.show();
+        });
+
+        // Toggle term select based on report type
+        document.getElementById('reportType').addEventListener('change', function() {
+            const termSelect = document.getElementById('termSelectContainer');
+            if (this.value === 'annual') {
+                termSelect.style.display = 'none';
+            } else {
+                termSelect.style.display = 'block';
+            }
+        });
+
+        // Tab functionality for charts
+        const chartTabs = document.querySelectorAll('.chart-tab');
+        chartTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs in this group
+                this.parentNode.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Update chart data based on selected tab
+                const chartContainer = this.closest('.chart-card');
+                const chartId = chartContainer.querySelector('canvas').id;
+                
+                if (chartId === 'performanceTrendChart') {
+                    // For performance trend chart
+                    const type = this.textContent.replace('By ', '').toLowerCase();
+                    fetchPerformanceData(type);
+                } else if (chartId === 'subjectPerformanceChart') {
+                    // For subject performance chart
+                    const level = this.textContent.toLowerCase();
+                    fetchSubjectData(level);
+                }
+            });
+        });
+
+        // Fetch performance data for different views
+        function fetchPerformanceData(type) {
+            const params = new URLSearchParams({
+                type: 'trend',
+                education_level: document.getElementById('education-level').value,
+                term: document.getElementById('term').value,
+                year: document.getElementById('year').value,
+                view: type
+            });
+            
+            fetch(`/performance/api/?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update chart with new data
+                    updateTrendChart(data);
+                });
+        }
+
+        // Fetch subject data for different levels
+        function fetchSubjectData(level) {
+            const params = new URLSearchParams({
+                type: 'subject',
+                education_level: level === 'all' ? '' : level,
+                term: document.getElementById('term').value,
+                year: document.getElementById('year').value
+            });
+            
+            fetch(`/performance/api/?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Update chart with new data
+                    updateSubjectChart(data);
+                });
+        }
+
+        // Update trend chart with new data
+        function updateTrendChart(data) {
+            trendChart.data.labels = data.map(item => `${item.term} ${item.academic_year}`);
+            trendChart.data.datasets[0].data = data.map(item => item.avg_score);
+            trendChart.update();
+        }
+
+        // Update subject chart with new data
+        function updateSubjectChart(data) {
+            subjectChart.data.labels = data.map(item => item.subject__name);
+            subjectChart.data.datasets[0].data = data.map(item => item.avg_score);
+            
+            // Generate new background colors if needed
+            const colors = ['#4361ee', '#3f37c9', '#4895ef', '#4cc9f0', '#f72585'];
+            subjectChart.data.datasets[0].backgroundColor = data.map((_, i) => colors[i % colors.length]);
+            subjectChart.data.datasets[0].borderColor = data.map((_, i) => colors[i % colors.length]);
+            
+            subjectChart.update();
+        }
+    });
+</script>
+{% endblock %}

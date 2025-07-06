@@ -360,3 +360,51 @@ class FinancialAid(models.Model):
             elif self.status == 'disbursed' and original.status != 'disbursed':
                 self.disbursement_date = timezone.now().date()
         super().save(*args, **kwargs)
+
+# Add to models.py
+
+class Subject(models.Model):
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=20, unique=True)
+    level = models.CharField(max_length=20, choices=Beneficiary.LEVEL_CHOICES)
+    is_core = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"{self.name} ({self.code})"
+
+class SubjectPerformance(models.Model):
+    beneficiary = models.ForeignKey(Beneficiary, on_delete=models.CASCADE, related_name='subject_performances')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    term = models.CharField(max_length=20)
+    academic_year = models.CharField(max_length=10)
+    score = models.DecimalField(max_digits=5, decimal_places=2)
+    grade = models.CharField(max_length=2)
+    comments = models.TextField(blank=True)
+    date_recorded = models.DateField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('beneficiary', 'subject', 'term', 'academic_year')
+        ordering = ['academic_year', 'term', 'subject__name']
+    
+    def __str__(self):
+        return f"{self.beneficiary} - {self.subject} ({self.term} {self.academic_year})"
+
+class PerformanceReport(models.Model):
+    REPORT_TYPE_CHOICES = (
+        ('term', 'Term Report'),
+        ('annual', 'Annual Report'),
+        ('subject', 'Subject Analysis'),
+        ('comparative', 'Comparative Analysis'),
+    )
+    
+    title = models.CharField(max_length=200)
+    report_type = models.CharField(max_length=20, choices=REPORT_TYPE_CHOICES)
+    academic_year = models.CharField(max_length=10)
+    term = models.CharField(max_length=20, blank=True, null=True)
+    generated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    generated_at = models.DateTimeField(auto_now_add=True)
+    report_file = models.FileField(upload_to='performance_reports/', blank=True, null=True)
+    notes = models.TextField(blank=True)
+    
+    def __str__(self):
+        return self.title

@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+
+
 urlpatterns = [
     
     path('', views.dashboard, name='dashboard'),
@@ -14,5 +16,10 @@ urlpatterns = [
     path('accounts/login/', views.login_view, name='login_view'),
     path('logout/', views.logout_view, name='logout_view'),
     
-    # Add other URLs as needed
+    path('financial/', views.financial_dashboard, name='financial_dashboard'),
+    path('financial/aid/', views.financial_aid_list, name='financial_aid_list'),
+    path('financial/aid/add/', views.add_financial_aid, name='add_financial_aid'),
+    path('financial/aid/<int:pk>/', views.financial_aid_detail, name='financial_aid_detail'),
+    path('financial/aid/<int:pk>/update-status/', views.update_financial_aid_status, name='update_financial_aid_status'),
+    path('financial/reports/', views.financial_reports, name='financial_reports'),
 ]

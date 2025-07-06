@@ -386,445 +386,260 @@ def delete_beneficiary(request, pk):
     }
     return render(request, 'beneficiary_confirm_delete.html', context)
 
-# @login_required
-# def financial_dashboard(request):
-#     # Account balances
-#     accounts = FinancialAccount.objects.filter(is_active=True)
-#     total_balance = accounts.aggregate(Sum('current_balance'))['current_balance__sum'] or 0
-    
-#     # Recent transactions
-#     recent_transactions = Transaction.objects.all().order_by('-date', '-created_at')[:10]
-    
-#     # Budget overview
-#     current_budgets = Budget.objects.filter(
-#         start_date__lte=timezone.now().date(),
-#         end_date__gte=timezone.now().date()
-#     )
-    
-#     # Income vs Expense
-#     today = timezone.now().date()
-#     start_of_month = today.replace(day=1)
-#     income_expense = Transaction.objects.filter(
-#         date__gte=start_of_month,
-#         date__lte=today
-#     ).values('transaction_type').annotate(
-#         total=Sum('amount')
-#     )
-    
-#     # Invoice status
-#     invoice_status = Invoice.objects.values('status').annotate(
-#         count=Count('id'),
-#         total=Sum('total_amount')
-#     )
-    
-#     context = {
-#         'accounts': accounts,
-#         'total_balance': total_balance,
-#         'recent_transactions': recent_transactions,
-#         'current_budgets': current_budgets,
-#         'income_expense': income_expense,
-#         'invoice_status': invoice_status,
-#         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
-#     }
-#     return render(request, 'financial_dashboard.html', context)
 
-# @login_required
-# def transaction_list(request):
-#     transactions = Transaction.objects.all().order_by('-date', '-created_at')
-    
-#     # Filtering
-#     transaction_type = request.GET.get('type')
-#     if transaction_type:
-#         transactions = transactions.filter(transaction_type=transaction_type)
-    
-#     account_id = request.GET.get('account')
-#     if account_id:
-#         transactions = transactions.filter(account_id=account_id)
-    
-#     date_from = request.GET.get('date_from')
-#     if date_from:
-#         transactions = transactions.filter(date__gte=date_from)
-    
-#     date_to = request.GET.get('date_to')
-#     if date_to:
-#         transactions = transactions.filter(date__lte=date_to)
-    
-#     # Pagination
-#     paginator = Paginator(transactions, 25)
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
-    
-#     context = {
-#         'transactions': page_obj,
-#         'accounts': FinancialAccount.objects.filter(is_active=True),
-#         'transaction_types': Transaction.TRANSACTION_TYPES,
-#         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
-#     }
-#     return render(request, 'transaction_list.html', context)
-
-# @login_required
-# def add_transaction(request):
-#     if request.method == 'POST':
-#         form_data = request.POST
-#         try:
-#             transaction = Transaction(
-#                 account_id=form_data.get('account'),
-#                 transaction_type=form_data.get('transaction_type'),
-#                 amount=form_data.get('amount'),
-#                 date=form_data.get('date'),
-#                 payment_method=form_data.get('payment_method'),
-#                 reference_number=form_data.get('reference_number'),
-#                 description=form_data.get('description'),
-#                 beneficiary_id=form_data.get('beneficiary'),
-#                 sponsor_id=form_data.get('sponsor'),
-#                 institution_id=form_data.get('institution'),
-#                 created_by=request.user
-#             )
-#             transaction.save()
-#             messages.success(request, 'Transaction recorded successfully!')
-#             return redirect('transaction_list')
-#         except Exception as e:
-#             messages.error(request, f'Error recording transaction: {str(e)}')
-    
-#     context = {
-#         'accounts': FinancialAccount.objects.filter(is_active=True),
-#         'beneficiaries': Beneficiary.objects.filter(is_active=True),
-#         'sponsors': Sponsor.objects.filter(is_active=True),
-#         'institutions': Institution.objects.filter(is_active=True),
-#         'transaction_types': Transaction.TRANSACTION_TYPES,
-#         'payment_methods': Transaction.PAYMENT_METHODS,
-#         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
-#     }
-#     return render(request, 'add_transaction.html', context)
-
-# @login_required
-# def budget_list(request):
-#     budgets = Budget.objects.all().order_by('-start_date')
-    
-#     # Filtering
-#     budget_type = request.GET.get('type')
-#     if budget_type:
-#         budgets = budgets.filter(budget_type=budget_type)
-    
-#     status = request.GET.get('status')
-#     if status == 'active':
-#         today = timezone.now().date()
-#         budgets = budgets.filter(start_date__lte=today, end_date__gte=today)
-#     elif status == 'upcoming':
-#         today = timezone.now().date()
-#         budgets = budgets.filter(start_date__gt=today)
-#     elif status == 'completed':
-#         today = timezone.now().date()
-#         budgets = budgets.filter(end_date__lt=today)
-    
-#     context = {
-#         'budgets': budgets,
-#         'budget_types': Budget.BUDGET_TYPES,
-#         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
-#     }
-#     return render(request, 'budget_list.html', context)
-
-# @login_required
-# def invoice_list(request):
-#     invoices = Invoice.objects.all().order_by('-date')
-    
-#     # Filtering
-#     status = request.GET.get('status')
-#     if status:
-#         invoices = invoices.filter(status=status)
-    
-#     sponsor_id = request.GET.get('sponsor')
-#     if sponsor_id:
-#         invoices = invoices.filter(sponsor_id=sponsor_id)
-    
-#     date_from = request.GET.get('date_from')
-#     if date_from:
-#         invoices = invoices.filter(date__gte=date_from)
-    
-#     date_to = request.GET.get('date_to')
-#     if date_to:
-#         invoices = invoices.filter(date__lte=date_to)
-    
-#     context = {
-#         'invoices': invoices,
-#         'sponsors': Sponsor.objects.filter(is_active=True),
-#         'status_choices': Invoice.STATUS_CHOICES,
-#         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
-#     }
-#     return render(request, 'invoice_list.html', context)
-
-# @login_required
-# def view_invoice(request, pk):
-#     invoice = get_object_or_404(Invoice, pk=pk)
-#     context = {
-#         'invoice': invoice,
-#         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
-#     }
-#     return render(request, 'view_invoice.html', context)
-
-# @login_required
-# def financial_reports(request):
-#     report_type = request.GET.get('report', 'income_expense')
-    
-#     # Default date range - current year
-#     today = timezone.now().date()
-#     start_date = request.GET.get('start_date', today.replace(month=1, day=1).isoformat())
-#     end_date = request.GET.get('end_date', today.isoformat())
-    
-#     # Convert to date objects
-#     start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
-#     end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
-    
-#     # Generate report data based on type
-#     report_data = None
-#     chart_data = None
-    
-#     if report_type == 'income_expense':
-#         transactions = Transaction.objects.filter(
-#             date__gte=start_date_obj,
-#             date__lte=end_date_obj
-#         ).values('transaction_type').annotate(
-#             total=Sum('amount')
-#         )
-        
-#         report_data = {
-#             'income': transactions.filter(transaction_type='income').first()['total'] if transactions.filter(transaction_type='income').exists() else 0,
-#             'expense': transactions.filter(transaction_type='expense').first()['total'] if transactions.filter(transaction_type='expense').exists() else 0,
-#             'net': (transactions.filter(transaction_type='income').first()['total'] if transactions.filter(transaction_type='income').exists() else 0) - 
-#                   (transactions.filter(transaction_type='expense').first()['total'] if transactions.filter(transaction_type='expense').exists() else 0)
-#         }
-        
-#         # Monthly breakdown for chart
-#         monthly_data = Transaction.objects.filter(
-#             date__gte=start_date_obj,
-#             date__lte=end_date_obj
-#         ).annotate(
-#             month=TruncMonth('date')
-#         ).values('month', 'transaction_type').annotate(
-#             total=Sum('amount')
-#         ).order_by('month')
-        
-#         chart_data = {
-#             'labels': [],
-#             'income': [],
-#             'expense': []
-#         }
-        
-#         current_month = start_date_obj
-#         while current_month <= end_date_obj:
-#             month_label = current_month.strftime('%b %Y')
-#             chart_data['labels'].append(month_label)
-            
-#             income = next((item['total'] for item in monthly_data 
-#                          if item['month'].month == current_month.month 
-#                          and item['month'].year == current_month.year
-#                          and item['transaction_type'] == 'income'), 0)
-#             chart_data['income'].append(float(income))
-            
-#             expense = next((item['total'] for item in monthly_data 
-#                           if item['month'].month == current_month.month 
-#                           and item['month'].year == current_month.year
-#                           and item['transaction_type'] == 'expense'), 0)
-#             chart_data['expense'].append(float(expense))
-            
-#             # Move to next month
-#             if current_month.month == 12:
-#                 current_month = current_month.replace(year=current_month.year + 1, month=1)
-#             else:
-#                 current_month = current_month.replace(month=current_month.month + 1)
-    
-#     elif report_type == 'budget_vs_actual':
-#         budgets = Budget.objects.filter(
-#             start_date__lte=end_date_obj,
-#             end_date__gte=start_date_obj
-#         )
-        
-#         report_data = []
-#         for budget in budgets:
-#             actual = Transaction.objects.filter(
-#                 transaction_type='expense',
-#                 date__gte=budget.start_date,
-#                 date__lte=budget.end_date,
-#                 description__icontains=budget.name
-#             ).aggregate(Sum('amount'))['amount__sum'] or 0
-            
-#             report_data.append({
-#                 'budget': budget,
-#                 'actual': actual,
-#                 'variance': budget.amount - actual
-#             })
-    
-#     context = {
-#         'report_type': report_type,
-#         'start_date': start_date,
-#         'end_date': end_date,
-#         'report_data': report_data,
-#         'chart_data': chart_data,
-#         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
-#     }
-#     return render(request, 'financial_reports.html', context)
-
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Sum, Count, Q
+from django.core.paginator import Paginator
+from .models import FinancialAid, Beneficiary, Sponsor
+from datetime import datetime
 
 @login_required
 def financial_dashboard(request):
-    # Financial summary
-    current_year = timezone.now().year
-    current_month = timezone.now().month
+    # Financial metrics
+    total_disbursed = FinancialAid.objects.filter(status='disbursed').aggregate(
+        total=Sum('amount_approved')
+    )['total'] or 0
     
-    # Transaction summary
-    transactions = FinancialTransaction.objects.filter(
-        status='completed'
-    ).select_related('beneficiary', 'sponsor', 'institution')
+    beneficiaries_supported = FinancialAid.objects.filter(
+        status='disbursed'
+    ).values('beneficiary').distinct().count()
     
-    # Monthly summary
-    monthly_summary = transactions.filter(
-        transaction_date__year=current_year
-    ).annotate(
-        month=ExtractMonth('transaction_date')
-    ).values('month').annotate(
-        total=Sum('amount'),
-        count=Count('id')
-    ).order_by('month')
+    average_award = FinancialAid.objects.filter(
+        status='disbursed'
+    ).aggregate(avg=Avg('amount_approved'))['avg'] or 0
     
-    # Transaction types summary
-    transaction_types = transactions.values('transaction_type').annotate(
-        total=Sum('amount'),
-        count=Count('id')
-    ).order_by('-total')
+    # Get current academic year (format: 2023-2024)
+    current_year = datetime.now().year
+    academic_year = f"{current_year}-{current_year + 1}"
     
-    # Recent transactions
-    recent_transactions = transactions.order_by('-transaction_date')[:5]
+    # Budget data (this would come from your budget model or settings)
+    total_budget = 7000000  # Example value
+    remaining_budget = total_budget - total_disbursed
     
-    # Budget overview
-    active_budgets = Budget.objects.filter(
-        is_active=True,
-        end_date__gte=timezone.now().date()
-    ).annotate(
-        spent_amount=Sum('financialtransaction__amount', filter=Q(financialtransaction__status='completed'))
+    # Recent disbursements
+    recent_disbursements = FinancialAid.objects.filter(
+        status='disbursed'
+    ).select_related('beneficiary').order_by('-disbursement_date')[:6]
     
-    # Sponsorship summary
-    sponsorship_summary = transactions.filter(
-        transaction_type='sponsorship'
-    ).values('sponsor__name').annotate(
-        total=Sum('amount'),
-        count=Count('id')
-    ).order_by('-total')[:5]
+    # Status distribution
+    status_distribution = FinancialAid.objects.values('status').annotate(
+        count=Count('id'),
+        total_amount=Sum('amount_approved')
+    )
     
     context = {
-        'monthly_summary': list(monthly_summary),
-        'transaction_types': list(transaction_types),
-        'recent_transactions': recent_transactions,
-        'active_budgets': active_budgets,
-        'sponsorship_summary': sponsorship_summary,
+        'total_disbursed': total_disbursed,
+        'beneficiaries_supported': beneficiaries_supported,
+        'average_award': average_award,
+        'remaining_budget': remaining_budget,
+        'total_budget': total_budget,
+        'recent_disbursements': recent_disbursements,
+        'status_distribution': status_distribution,
+        'academic_year': academic_year,
         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
     }
     
     return render(request, 'financial_dashboard.html', context)
 
 @login_required
-def transaction_list(request):
-    # Filter parameters
-    transaction_type = request.GET.get('type')
+def financial_aid_list(request):
+    # Get filter parameters
+    education_level = request.GET.get('education_level')
     status = request.GET.get('status')
-    start_date = request.GET.get('start_date')
-    end_date = request.GET.get('end_date')
-    search = request.GET.get('search')
+    year = request.GET.get('year')
+    sponsor_id = request.GET.get('sponsor')
+    search_query = request.GET.get('search', '')
     
-    transactions = FinancialTransaction.objects.all().select_related(
-        'beneficiary', 'sponsor', 'institution', 'recorded_by'
-    ).order_by('-transaction_date')
+    # Start with all records
+    financial_aids = FinancialAid.objects.all().select_related(
+        'beneficiary', 'beneficiary__institution', 'beneficiary__sponsor'
+    ).order_by('-request_date')
     
     # Apply filters
-    if transaction_type:
-        transactions = transactions.filter(transaction_type=transaction_type)
-    if status:
-        transactions = transactions.filter(status=status)
-    if start_date:
-        transactions = transactions.filter(transaction_date__gte=start_date)
-    if end_date:
-        transactions = transactions.filter(transaction_date__lte=end_date)
-    if search:
-        transactions = transactions.filter(
-            Q(reference_number__icontains=search) |
-            Q(description__icontains=search) |
-            Q(beneficiary__first_name__icontains=search) |
-            Q(beneficiary__last_name__icontains=search) |
-            Q(sponsor__name__icontains=search)
+    if education_level:
+        financial_aids = financial_aids.filter(
+            beneficiary__current_level=education_level
         )
     
+    if status:
+        financial_aids = financial_aids.filter(status=status)
+    
+    if year:
+        financial_aids = financial_aids.filter(academic_year=year)
+    
+    if sponsor_id:
+        financial_aids = financial_aids.filter(
+            beneficiary__sponsor__id=sponsor_id
+        )
+    
+    if search_query:
+        financial_aids = financial_aids.filter(
+            Q(beneficiary__first_name__icontains=search_query) |
+            Q(beneficiary__last_name__icontains=search_query) |
+            Q(receipt_number__icontains=search_query)
+        )
+    
+    # Get distinct academic years for filter dropdown
+    academic_years = FinancialAid.objects.values_list(
+        'academic_year', flat=True
+    ).distinct().order_by('-academic_year')
+    
     # Pagination
-    paginator = Paginator(transactions, 25)
+    paginator = Paginator(financial_aids, 25)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
     context = {
-        'transactions': page_obj,
-        'transaction_types': FinancialTransaction.TRANSACTION_TYPES,
-        'status_choices': FinancialTransaction.STATUS_CHOICES,
+        'financial_aids': page_obj,
+        'education_levels': Beneficiary.LEVEL_CHOICES,
+        'academic_years': academic_years,
+        'sponsors': Sponsor.objects.all(),
+        'status_choices': FinancialAid.STATUS_CHOICES,
         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
         'is_paginated': paginator.num_pages > 1,
     }
     
-    return render(request, 'financial_transactions.html', context)
+    return render(request, 'financial_aid_list.html', context)
 
 @login_required
-def add_transaction(request):
+def add_financial_aid(request):
     if request.method == 'POST':
-        form = FinancialTransactionForm(request.POST, request.FILES)
-        if form.is_valid():
-            transaction = form.save(commit=False)
-            transaction.recorded_by = request.user
-            transaction.save()
-            messages.success(request, 'Transaction added successfully!')
-            return redirect('transaction_detail', pk=transaction.pk)
+        beneficiary_id = request.POST.get('beneficiary')
+        academic_year = request.POST.get('academic_year')
+        term = request.POST.get('term')
+        amount_requested = request.POST.get('amount_requested')
+        notes = request.POST.get('notes', '')
+        
+        # Validate
+        errors = {}
+        if not beneficiary_id:
+            errors['beneficiary'] = 'Beneficiary is required'
+        if not academic_year:
+            errors['academic_year'] = 'Academic year is required'
+        if not term:
+            errors['term'] = 'Term is required'
+        if not amount_requested:
+            errors['amount_requested'] = 'Amount requested is required'
+        
+        if errors:
+            beneficiaries = Beneficiary.objects.filter(is_active=True)
+            context = {
+                'beneficiaries': beneficiaries,
+                'term_choices': FinancialAid.TERM_CHOICES,
+                'errors': errors,
+                'form_data': request.POST,
+                'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
+            }
+            return render(request, 'financial_aid_add.html', context)
+        
+        try:
+            financial_aid = FinancialAid(
+                beneficiary_id=beneficiary_id,
+                academic_year=academic_year,
+                term=term,
+                amount_requested=amount_requested,
+                notes=notes,
+                status='pending'
+            )
+            financial_aid.save()
+            
+            messages.success(request, 'Financial aid request submitted successfully!')
+            return redirect('financial_aid_detail', pk=financial_aid.pk)
+        
+        except Exception as e:
+            messages.error(request, f'Error creating financial aid request: {str(e)}')
+            return redirect('add_financial_aid')
+    
     else:
-        form = FinancialTransactionForm()
+        # GET request
+        beneficiaries = Beneficiary.objects.filter(is_active=True)
+        current_year = datetime.now().year
+        academic_year = f"{current_year}-{current_year + 1}"
+        
+        context = {
+            'beneficiaries': beneficiaries,
+            'term_choices': FinancialAid.TERM_CHOICES,
+            'default_academic_year': academic_year,
+            'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
+        }
+        return render(request, 'financial_aid_add.html', context)
+
+@login_required
+def financial_aid_detail(request, pk):
+    financial_aid = get_object_or_404(FinancialAid, pk=pk)
     
     context = {
-        'form': form,
+        'financial_aid': financial_aid,
         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
     }
-    return render(request, 'financial_transaction_add.html', context)
+    return render(request, 'financial_aid_detail.html', context)
 
 @login_required
-def transaction_detail(request, pk):
-    transaction = get_object_or_404(FinancialTransaction, pk=pk)
-    context = {
-        'transaction': transaction,
-        'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
-    }
-    return render(request, 'financial_transaction_detail.html', context)
-
-@login_required
-def budget_list(request):
-    budgets = Budget.objects.all().order_by('-start_date')
-    context = {
-        'budgets': budgets,
-        'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
-    }
-    return render(request, 'financial_budgets.html', context)
-
-@login_required
-def generate_report(request):
+def update_financial_aid_status(request, pk):
+    financial_aid = get_object_or_404(FinancialAid, pk=pk)
+    
     if request.method == 'POST':
-        form = FinancialReportForm(request.POST)
-        if form.is_valid():
-            # Generate report logic here
-            # This would typically create a PDF or Excel file
-            # For now, we'll just simulate it
+        new_status = request.POST.get('status')
+        amount_approved = request.POST.get('amount_approved')
+        notes = request.POST.get('notes', '')
+        
+        if not new_status:
+            messages.error(request, 'Status is required')
+            return redirect('financial_aid_detail', pk=financial_aid.pk)
+        
+        if new_status == 'approved' and not amount_approved:
+            messages.error(request, 'Approved amount is required when approving')
+            return redirect('financial_aid_detail', pk=financial_aid.pk)
+        
+        try:
+            financial_aid.status = new_status
+            if amount_approved:
+                financial_aid.amount_approved = amount_approved
+            if notes:
+                financial_aid.notes = notes
+            if new_status == 'approved':
+                financial_aid.approved_by = request.user
+            financial_aid.save()
             
-            report = form.save(commit=False)
-            report.generated_by = request.user
-            report.report_file.name = f"reports/report_{timezone.now().timestamp()}.pdf"
-            report.save()
-            
-            messages.success(request, 'Report generated successfully!')
-            return redirect('report_detail', pk=report.pk)
-    else:
-        form = FinancialReportForm()
+            messages.success(request, f'Financial aid status updated to {financial_aid.get_status_display()}')
+            return redirect('financial_aid_detail', pk=financial_aid.pk)
+        
+        except Exception as e:
+            messages.error(request, f'Error updating financial aid: {str(e)}')
+            return redirect('financial_aid_detail', pk=financial_aid.pk)
+    
+    return redirect('financial_aid_detail', pk=financial_aid.pk)
+
+@login_required
+def financial_reports(request):
+    # Generate reports data
+    disbursements_by_term = FinancialAid.objects.filter(
+        status='disbursed'
+    ).values('academic_year', 'term').annotate(
+        total_amount=Sum('amount_approved'),
+        count=Count('id')
+    ).order_by('academic_year', 'term')
+    
+    disbursements_by_level = FinancialAid.objects.filter(
+        status='disbursed'
+    ).values('beneficiary__current_level').annotate(
+        total_amount=Sum('amount_approved'),
+        count=Count('id')
+    ).order_by('beneficiary__current_level')
+    
+    funding_sources = FinancialAid.objects.filter(
+        status='disbursed'
+    ).values('beneficiary__sponsor__name').annotate(
+        total_amount=Sum('amount_approved'),
+        count=Count('id')
+    ).order_by('-total_amount')
     
     context = {
-        'form': form,
+        'disbursements_by_term': disbursements_by_term,
+        'disbursements_by_level': disbursements_by_level,
+        'funding_sources': funding_sources,
         'unread_notifications': Notification.objects.filter(user=request.user, is_read=False).count(),
     }
-    return render(request, 'financial_report_generate.html', context)
+    return render(request, 'financial_reports.html', context)

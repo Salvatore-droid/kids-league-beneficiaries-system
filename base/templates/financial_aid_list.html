@@ -1,0 +1,230 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Additional styles specific to the list view */
+    .status-filter {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .status-filter-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 1px solid var(--gray-light);
+        background-color: var(--white);
+        color: var(--gray);
+    }
+    
+    .status-filter-btn.active {
+        background-color: var(--primary);
+        color: var(--white);
+        border-color: var(--primary);
+    }
+    
+    .status-filter-btn.pending {
+        border-color: rgba(248, 150, 30, 0.3);
+        color: var(--warning);
+    }
+    
+    .status-filter-btn.approved {
+        border-color: rgba(76, 201, 240, 0.3);
+        color: var(--success);
+    }
+    
+    .status-filter-btn.rejected {
+        border-color: rgba(247, 37, 133, 0.3);
+        color: var(--danger);
+    }
+    
+    .status-filter-btn.disbursed {
+        border-color: rgba(67, 97, 238, 0.3);
+        color: var(--primary);
+    }
+    
+    .table-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background-color: var(--lighter);
+        border-radius: var(--border-radius);
+        margin-top: 1rem;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: var(--gray-light);
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state h3 {
+        color: var(--gray);
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-state p {
+        color: var(--gray);
+        max-width: 500px;
+        margin: 0 auto 1.5rem;
+    }
+</style>
+
+<div class="financial-container">
+    <div class="financial-header">
+        <h2>Financial Aid Records</h2>
+        <div class="financial-actions">
+            <a href="{% url 'add_financial_aid' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Request
+            </a>
+            <a href="{% url 'financial_reports' %}" class="btn btn-secondary">
+                <i class="fas fa-file-export"></i> Export Data
+            </a>
+        </div>
+    </div>
+
+    <!-- Status Filter Tabs -->
+    <div class="status-filter">
+        <a href="?status=" class="status-filter-btn {% if not request.GET.status %}active{% endif %}">
+            All Records
+        </a>
+        {% for status in status_choices %}
+        <a href="?status={{ status.0 }}" class="status-filter-btn {{ status.0 }} {% if request.GET.status == status.0 %}active{% endif %}">
+            {{ status.1 }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Financial Aid Table -->
+    <div class="table-responsive">
+        <table class="financial-table">
+            <thead>
+                <tr>
+                    <th>Beneficiary</th>
+                    <th>Academic Year</th>
+                    <th>Term</th>
+                    <th>Amount Requested</th>
+                    <th>Amount Approved</th>
+                    <th>Status</th>
+                    <th>Request Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for aid in financial_aids %}
+                <tr>
+                    <td data-label="Beneficiary">
+                        <div style="display: flex; align-items: center;">
+                            <img src="{% if aid.beneficiary.photo %}{{ aid.beneficiary.photo.url }}{% else %}{% static 'img/default-avatar.png' %}{% endif %}" alt="Student" class="student-avatar">
+                            <div>
+                                <div style="font-weight: 600;">{{ aid.beneficiary.first_name }} {{ aid.beneficiary.last_name }}</div>
+                                <div style="font-size: 0.8rem; color: var(--gray);">{{ aid.beneficiary.get_current_level_display }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td data-label="Academic Year">{{ aid.academic_year }}</td>
+                    <td data-label="Term">{{ aid.get_term_display }}</td>
+                    <td data-label="Amount Requested"><span class="currency-amount">{{ aid.amount_requested|floatformat:2 }}</span></td>
+                    <td data-label="Amount Approved">
+                        {% if aid.amount_approved %}
+                            <span class="currency-amount">{{ aid.amount_approved|floatformat:2 }}</span>
+                        {% else %}
+                            --
+                        {% endif %}
+                    </td>
+                    <td data-label="Status">
+                        {% if aid.status == 'approved' %}
+                            <span class="status-badge status-approved">Approved</span>
+                        {% elif aid.status == 'pending' %}
+                            <span class="status-badge status-pending">Pending</span>
+                        {% elif aid.status == 'rejected' %}
+                            <span class="status-badge status-rejected">Rejected</span>
+                        {% elif aid.status == 'disbursed' %}
+                            <span class="status-badge status-disbursed">Disbursed</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Request Date">{{ aid.request_date|date:"d M Y" }}</td>
+                    <td data-label="Actions">
+                        <div class="table-actions">
+                            <a href="{% url 'financial_aid_detail' pk=aid.pk %}" class="action-btn view" title="View Details"><i class="fas fa-eye"></i></a>
+                            {% if aid.status == 'pending' or request.user.is_superuser %}
+                                <a href="{% url 'financial_aid_detail' pk=aid.pk %}" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <h3>No Financial Aid Records Found</h3>
+                            <p>There are currently no financial aid records matching your criteria. You can add a new record by clicking the "New Request" button.</p>
+                            <a href="{% url 'add_financial_aid' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Create New Request
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination">
+        <ul class="pagination">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo; First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+                </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Last &raquo;</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+$(document).ready(function() {
+    // Submit filter form on select change
+    $('#education_level, #status, #year, #sponsor').on('change', function() {
+        $(this).closest('form').submit();
+    });
+});
+</script>
+{% endblock %}

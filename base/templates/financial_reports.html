@@ -1,0 +1,391 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Reports-specific styles */
+    .report-container {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        padding: 2rem;
+    }
+    
+    .report-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--gray-light);
+    }
+    
+    .report-header h2 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+    
+    .report-period {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        align-items: center;
+    }
+    
+    .report-period-select {
+        padding: 0.65rem 1rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--gray-light);
+        font-size: 0.925rem;
+    }
+    
+    .report-section {
+        margin-bottom: 3rem;
+    }
+    
+    .report-section h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-left: 1rem;
+    }
+    
+    .report-section h3::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 20px;
+        background: linear-gradient(to bottom, var(--primary), var(--accent));
+        border-radius: 2px;
+    }
+    
+    .report-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+    }
+    
+    .report-table th {
+        padding: 1rem;
+        font-weight: 600;
+        color: var(--dark);
+        background-color: var(--lighter);
+        border-bottom: 2px solid var(--gray-light);
+        text-align: left;
+    }
+    
+    .report-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--gray-light);
+    }
+    
+    .report-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .report-table .total-row {
+        font-weight: 600;
+        background-color: var(--primary-light);
+    }
+    
+    .chart-container {
+        height: 400px;
+        margin-bottom: 2rem;
+    }
+    
+    .report-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .report-period {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<div class="report-container">
+    <div class="report-header">
+        <h2>Financial Aid Reports</h2>
+        <p>Comprehensive reports on scholarship disbursements and financial support</p>
+    </div>
+
+    <div class="report-period">
+        <div>
+            <label for="report_year">Academic Year:</label>
+            <select id="report_year" class="report-period-select">
+                <option>2023-2024</option>
+                <option>2022-2023</option>
+                <option>2021-2022</option>
+            </select>
+        </div>
+        <div>
+            <label for="report_term">Term:</label>
+            <select id="report_term" class="report-period-select">
+                <option>All Terms</option>
+                <option>Term 1</option>
+                <option>Term 2</option>
+                <option>Term 3</option>
+            </select>
+        </div>
+        <button class="btn btn-primary">
+            <i class="fas fa-filter"></i> Apply Filters
+        </button>
+        <button class="btn btn-secondary">
+            <i class="fas fa-print"></i> Print Report
+        </button>
+    </div>
+
+    <div class="report-section">
+        <h3>Disbursements by Term</h3>
+        <div class="chart-container">
+            <canvas id="disbursementTermChart"></canvas>
+        </div>
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Term</th>
+                    <th>Number of Disbursements</th>
+                    <th>Total Amount (KES)</th>
+                    <th>Average Amount (KES)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in disbursements_by_term %}
+                <tr>
+                    <td>Term {{ item.term }}</td>
+                    <td>{{ item.count }}</td>
+                    <td>{{ item.total_amount|floatformat:2 }}</td>
+                    <td>{{ item.average_amount|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="total-row">
+                    <td>Total</td>
+                    <td>{{ total_disbursements.count }}</td>
+                    <td>{{ total_disbursements.total_amount|floatformat:2 }}</td>
+                    <td>{{ total_disbursements.average_amount|floatformat:2 }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="report-section">
+        <h3>Disbursements by Education Level</h3>
+        <div class="chart-container">
+            <canvas id="disbursementLevelChart"></canvas>
+        </div>
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Education Level</th>
+                    <th>Number of Beneficiaries</th>
+                    <th>Total Amount (KES)</th>
+                    <th>Average Award (KES)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in disbursements_by_level %}
+                <tr>
+                    <td>{{ item.level }}</td>
+                    <td>{{ item.count }}</td>
+                    <td>{{ item.total_amount|floatformat:2 }}</td>
+                    <td>{{ item.average_amount|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="report-section">
+        <h3>Funding Sources</h3>
+        <div class="chart-container">
+            <canvas id="fundingSourcesChart"></canvas>
+        </div>
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Sponsor</th>
+                    <th>Number of Beneficiaries</th>
+                    <th>Total Amount (KES)</th>
+                    <th>Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in funding_sources %}
+                <tr>
+                    <td>{{ item.sponsor }}</td>
+                    <td>{{ item.count }}</td>
+                    <td>{{ item.total_amount|floatformat:2 }}</td>
+                    <td>{{ item.percentage|floatformat:1 }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="report-actions">
+        <button class="btn btn-primary">
+            <i class="fas fa-file-pdf"></i> Export as PDF
+        </button>
+        <button class="btn btn-secondary">
+            <i class="fas fa-file-excel"></i> Export as Excel
+        </button>
+        <button class="btn btn-secondary">
+            <i class="fas fa-envelope"></i> Email Report
+        </button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // Disbursement by Term Chart
+    const termCtx = document.getElementById('disbursementTermChart').getContext('2d');
+    const termChart = new Chart(termCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Term 1', 'Term 2', 'Term 3'],
+            datasets: [{
+                label: 'Disbursements (KES)',
+                data: [
+                    {% for item in disbursements_by_term %}{{ item.total_amount }}{% if not forloop.last %},{% endif %}{% endfor %}
+                ],
+                backgroundColor: [
+                    'rgba(67, 97, 238, 0.7)',
+                    'rgba(72, 149, 239, 0.7)',
+                    'rgba(76, 201, 240, 0.7)'
+                ],
+                borderColor: [
+                    '#4361ee',
+                    '#4895ef',
+                    '#4cc9f0'
+                ],
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'KES ' + context.raw.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'KES ' + (value / 1000) + 'K';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Disbursement by Level Chart
+    const levelCtx = document.getElementById('disbursementLevelChart').getContext('2d');
+    const levelChart = new Chart(levelCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                {% for item in disbursements_by_level %}'{{ item.level }}'{% if not forloop.last %},{% endif %}{% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for item in disbursements_by_level %}{{ item.total_amount }}{% if not forloop.last %},{% endif %}{% endfor %}
+                ],
+                backgroundColor: [
+                    '#4361ee',
+                    '#3f37c9',
+                    '#4895ef',
+                    '#4cc9f0',
+                    '#f72585'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: KES ${value.toLocaleString()} (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            cutout: '60%'
+        }
+    });
+
+    // Funding Sources Chart
+    const fundingCtx = document.getElementById('fundingSourcesChart').getContext('2d');
+    const fundingChart = new Chart(fundingCtx, {
+        type: 'pie',
+        data: {
+            labels: [
+                {% for item in funding_sources %}'{{ item.sponsor }}'{% if not forloop.last %},{% endif %}{% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for item in funding_sources %}{{ item.total_amount }}{% if not forloop.last %},{% endif %}{% endfor %}
+                ],
+                backgroundColor: [
+                    '#4361ee',
+                    '#4895ef',
+                    '#4cc9f0',
+                    '#f8961e',
+                    '#f72585'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: KES ${value.toLocaleString()} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

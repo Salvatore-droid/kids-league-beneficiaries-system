@@ -30,8 +30,8 @@
         --border-radius-xl: 1rem;
     }
 
-    /* Financial Dashboard Specific Styles */
-    .financial-header {
+    /* Financial Aid Page Specific Styles */
+    .main-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -41,7 +41,7 @@
         animation: fadeInDown 0.6s ease;
     }
 
-    .financial-header h1 {
+    .main-header h1 {
         font-size: 2rem;
         font-weight: 700;
         color: var(--dark);
@@ -49,188 +49,302 @@
         padding-bottom: 0.5rem;
     }
 
-    .financial-header h1::after {
+    .main-header h1::after {
         content: '';
         position: absolute;
         left: 0;
-        bottom: -2.2rem;
+        bottom: -1.5rem;
         width: 60px;
         height: 4px;
         background: linear-gradient(90deg, var(--primary), var(--accent));
         border-radius: 2px;
     }
 
-    .financial-header p {
-        color: var(--gray);
-        font-size: 0.95rem;
-        margin-top: 0.5rem;
+    /* Financial Aid Container */
+    .financial-container {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        animation: fadeIn 0.8s ease;
     }
 
-    /* Financial Summary Cards */
-    .financial-summary {
+    .financial-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .financial-header h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark);
+        position: relative;
+        padding-left: 1rem;
+    }
+
+    .financial-header h2::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 24px;
+        background: linear-gradient(to bottom, var(--primary), var(--accent));
+        border-radius: 2px;
+    }
+
+    /* Financial Metrics Cards */
+    .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 1.5rem;
         margin-bottom: 2rem;
     }
 
-    .summary-card {
+    .metric-card {
         background-color: var(--white);
         border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow);
         padding: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(67, 97, 238, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+        z-index: -1;
+        opacity: 0;
         transition: var(--transition);
     }
 
-    .summary-card:hover {
+    .metric-card:hover {
         transform: translateY(-5px);
         box-shadow: var(--shadow-lg);
     }
 
-    .summary-card.income {
-        border-left: 4px solid var(--success);
+    .metric-card:hover::before {
+        opacity: 1;
     }
 
-    .summary-card.expense {
-        border-left: 4px solid var(--danger);
-    }
-
-    .summary-card.budget {
-        border-left: 4px solid var(--primary);
-    }
-
-    .summary-card.sponsorship {
-        border-left: 4px solid var(--accent);
-    }
-
-    .summary-card h3 {
-        font-size: 1rem;
-        font-weight: 600;
+    .metric-title {
+        font-size: 0.95rem;
+        font-weight: 500;
         color: var(--gray);
         margin-bottom: 0.5rem;
-    }
-
-    .summary-card .amount {
-        font-size: 1.75rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .summary-card .change {
-        font-size: 0.85rem;
         display: flex;
         align-items: center;
     }
 
-    .change.positive {
+    .metric-title i {
+        margin-right: 8px;
+        font-size: 1rem;
+    }
+
+    .metric-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .metric-value.currency {
+        font-size: 1.5rem;
+    }
+
+    .metric-change {
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+    }
+
+    .metric-change i {
+        margin-right: 5px;
+        font-size: 0.8rem;
+    }
+
+    .metric-change.positive {
         color: var(--success);
     }
 
-    .change.negative {
+    .metric-change.negative {
         color: var(--danger);
     }
 
-    /* Charts Container */
-    .charts-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
+    /* Filters Section */
+    .filters-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
         margin-bottom: 2rem;
+        padding: 1.25rem;
+        background-color: var(--lighter);
+        border-radius: var(--border-radius);
     }
 
-    @media (max-width: 992px) {
-        .charts-container {
-            grid-template-columns: 1fr;
-        }
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--dark);
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 0.65rem 1rem;
+        border-radius: var(--border-radius);
+        border: 1px solid var(--gray-light);
+        background-color: var(--white);
+        font-size: 0.925rem;
+        transition: var(--transition);
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.2);
+    }
+
+    /* Charts Section */
+    .charts-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 1.75rem;
+        margin-bottom: 2rem;
     }
 
     .chart-card {
         background-color: var(--white);
         border-radius: var(--border-radius-lg);
+        padding: 1.75rem;
         box-shadow: var(--shadow);
-        padding: 1.5rem;
+        transition: var(--transition);
     }
 
-    .chart-card h3 {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        color: var(--dark);
+    .chart-card:hover {
+        box-shadow: var(--shadow-lg);
     }
 
-    .chart-placeholder {
-        height: 300px;
+    .chart-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        background-color: var(--lighter);
-        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
     }
 
-    /* Recent Transactions */
-    .recent-transactions {
-        background-color: var(--white);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow);
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .recent-transactions h3 {
+    .chart-header h3 {
         font-size: 1.25rem;
         font-weight: 600;
-        margin-bottom: 1.5rem;
         color: var(--dark);
+        position: relative;
+        padding-left: 1rem;
     }
 
-    .transaction-table {
+    .chart-header h3::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 20px;
+        background: linear-gradient(to bottom, var(--primary), var(--accent));
+        border-radius: 2px;
+    }
+
+    .chart-tabs {
+        display: flex;
+        gap: 0.5rem;
+        background-color: var(--lighter);
+        border-radius: 50px;
+        padding: 0.25rem;
+    }
+
+    .chart-tab {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        background-color: transparent;
+        color: var(--gray);
+    }
+
+    .chart-tab.active {
+        background-color: var(--white);
+        color: var(--primary);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .chart-container {
+        position: relative;
+        height: 320px;
+        width: 100%;
+    }
+
+    /* Financial Aid Table */
+    .financial-table {
         width: 100%;
         border-collapse: collapse;
+        margin-top: 2rem;
     }
 
-    .transaction-table th {
-        text-align: left;
-        padding: 0.75rem 1rem;
-        background-color: var(--lighter);
+    .financial-table thead th {
+        padding: 1rem;
         font-weight: 600;
         color: var(--dark);
+        background-color: var(--lighter);
+        border-bottom: 2px solid var(--gray-light);
+        text-align: left;
     }
 
-    .transaction-table td {
+    .financial-table tbody td {
         padding: 1rem;
         border-bottom: 1px solid var(--gray-light);
+        vertical-align: middle;
     }
 
-    .transaction-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    .transaction-table tr:hover {
+    .financial-table tbody tr:hover {
         background-color: var(--primary-light);
     }
 
-    .transaction-amount {
-        font-weight: 600;
-    }
-
-    .transaction-amount.income {
-        color: var(--success);
-    }
-
-    .transaction-amount.expense {
-        color: var(--danger);
-    }
-
-    .transaction-status {
+    /* Status Badges */
+    .status-badge {
         display: inline-block;
         padding: 0.35rem 0.75rem;
         border-radius: 50px;
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .status-completed {
+    .status-approved {
         background-color: rgba(76, 201, 240, 0.1);
         color: var(--success);
     }
@@ -240,313 +354,395 @@
         color: var(--warning);
     }
 
-    .status-failed {
+    .status-rejected {
         background-color: rgba(247, 37, 133, 0.1);
         color: var(--danger);
     }
 
-    /* Budget Overview */
-    .budget-overview {
-        background-color: var(--white);
-        border-radius: var(--border-radius-lg);
-        box-shadow: var(--shadow);
-        padding: 1.5rem;
+    .status-disbursed {
+        background-color: rgba(67, 97, 238, 0.1);
+        color: var(--primary);
     }
 
-    .budget-overview h3 {
-        font-size: 1.25rem;
+    /* Currency Format */
+    .currency-amount {
         font-weight: 600;
-        margin-bottom: 1.5rem;
         color: var(--dark);
     }
 
-    .budget-item {
-        margin-bottom: 1.5rem;
-    }
-
-    .budget-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.5rem;
-    }
-
-    .budget-title {
-        font-weight: 600;
-    }
-
-    .budget-amount {
-        font-weight: 600;
-    }
-
-    .progress-container {
-        height: 8px;
-        background-color: var(--gray-light);
-        border-radius: 4px;
-        margin-bottom: 0.5rem;
-        overflow: hidden;
-    }
-
-    .progress-bar {
-        height: 100%;
-        border-radius: 4px;
-    }
-
-    .progress-safe {
-        background-color: var(--success);
-    }
-
-    .progress-warning {
-        background-color: var(--warning);
-    }
-
-    .progress-danger {
-        background-color: var(--danger);
-    }
-
-    .budget-meta {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.85rem;
+    .currency-amount::before {
+        content: 'KES ';
+        font-weight: 500;
         color: var(--gray);
     }
 
     /* Responsive Design */
     @media (max-width: 768px) {
-        .financial-summary {
-            grid-template-columns: 1fr;
+        .metrics-grid {
+            grid-template-columns: 1fr 1fr;
         }
         
-        .transaction-table {
+        .filters-section {
+            flex-direction: column;
+        }
+        
+        .financial-table {
             display: block;
             overflow-x: auto;
+            white-space: nowrap;
         }
     }
 
-    /* Animations */
-    @keyframes fadeIn {
-        from { opacity:0; }
-        to { opacity:1; }
-    }
-
-    @keyframes fadeInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
+    @media (max-width: 576px) {
+        .metrics-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
 
-    <header class="financial-header">
-        <div class="header-left">
-            <h1>Financial Dashboard</h1>
-            <p>Comprehensive overview of your organization's finances</p>
-        </div>
+<header class="main-header">
+    <div class="header-left">
+        <h1>Financial Aid Management</h1>
+        <p>Track and manage all scholarship disbursements and financial support</p>
+    </div>
+    <div class="header-right">
+        <form method="GET" action="{% url 'financial_aid_list' %}" class="search-bar">
+            <input type="text" name="search" placeholder="Search beneficiaries, sponsors..." value="{{ request.GET.search }}">
+            <i class="fas fa-search"></i>
+        </form>
         <div class="header-actions">
             <div class="notification-btn tooltip" data-tooltip="Notifications">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge">{{ unread_notifications }}</span>
             </div>
+            <div class="message-btn tooltip" data-tooltip="Messages">
+                <i class="fas fa-envelope"></i>
+            </div>
             <div class="profile-btn">
                 <img src="{% static 'img/avatar.png' %}" alt="Profile">
             </div>
         </div>
-    </header>
-
-    <!-- Financial Summary Cards -->
-    <div class="financial-summary">
-        <div class="summary-card income">
-            <h3>Total Income</h3>
-            <div class="amount">$12,450.00</div>
-            <div class="change positive">
-                <i class="fas fa-arrow-up"></i> 12% from last month
-            </div>
-        </div>
-        <div class="summary-card expense">
-            <h3>Total Expenses</h3>
-            <div class="amount">$8,720.00</div>
-            <div class="change negative">
-                <i class="fas fa-arrow-down"></i> 5% from last month
-            </div>
-        </div>
-        <div class="summary-card budget">
-            <h3>Budget Utilization</h3>
-            <div class="amount">78%</div>
-            <div class="change positive">
-                <i class="fas fa-info-circle"></i> On track
-            </div>
-        </div>
-        <div class="summary-card sponsorship">
-            <h3>Sponsorship Funds</h3>
-            <div class="amount">$9,350.00</div>
-            <div class="change positive">
-                <i class="fas fa-arrow-up"></i> 8% from last month
-            </div>
-        </div>
     </div>
+</header>
 
-    <!-- Charts Container -->
-    <div class="charts-container">
-        <div class="chart-card">
-            <h3>Monthly Financial Summary</h3>
-            <div class="chart-placeholder">
-                <p>Monthly income vs. expenses chart will appear here</p>
-            </div>
-        </div>
-        <div class="chart-card">
-            <h3>Transaction Types Distribution</h3>
-            <div class="chart-placeholder">
-                <p>Transaction types pie chart will appear here</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Transactions -->
-    <div class="recent-transactions">
-        <div class="flex justify-between items-center mb-6">
-            <h3>Recent Transactions</h3>
-            <a href="{% url 'transaction_list' %}" class="btn btn-secondary">
-                <i class="fas fa-list"></i> View All Transactions
+<!-- Financial Aid Section -->
+<section class="financial-container">
+    <div class="financial-header">
+        <h2>Scholarship Disbursements</h2>
+        <div class="financial-actions">
+            <a href="{% url 'add_financial_aid' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Disbursement
+            </a>
+            <a href="{% url 'financial_reports' %}" class="btn btn-secondary">
+                <i class="fas fa-file-export"></i> Export Report
             </a>
         </div>
-        <table class="transaction-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Description</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for transaction in recent_transactions %}
-                <tr>
-                    <td>{{ transaction.transaction_date|date:"M d, Y" }}</td>
-                    <td>{{ transaction.description|truncatechars:40 }}</td>
-                    <td>{{ transaction.get_transaction_type_display }}</td>
-                    <td class="transaction-amount {% if transaction.transaction_type in ['sponsorship', 'donation'] %}income{% else %}expense{% endif %}">
-                        ${{ transaction.amount }}
-                    </td>
-                    <td>
-                        <span class="transaction-status status-{{ transaction.status }}">
-                            {{ transaction.get_status_display }}
-                        </span>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center py-4">No recent transactions found</td>
-                </tr>
+    </div>
+
+    <!-- Financial Metrics -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-title">
+                <i class="fas fa-wallet"></i> Total Disbursed
+            </div>
+            <div class="metric-value currency">{{ total_disbursed|floatformat:2 }}</div>
+            <div class="metric-change positive">
+                <i class="fas fa-arrow-up"></i> {{ academic_year }}
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">
+                <i class="fas fa-users"></i> Beneficiaries Supported
+            </div>
+            <div class="metric-value">{{ beneficiaries_supported }}</div>
+            <div class="metric-change positive">
+                <i class="fas fa-arrow-up"></i> Current Year
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">
+                <i class="fas fa-hand-holding-usd"></i> Average Award
+            </div>
+            <div class="metric-value currency">{{ average_award|floatformat:2 }}</div>
+            <div class="metric-change">
+                <i class="fas fa-percentage"></i> Per Beneficiary
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">
+                <i class="fas fa-piggy-bank"></i> Remaining Budget
+            </div>
+            <div class="metric-value currency">{{ remaining_budget|floatformat:2 }}</div>
+            <div class="metric-change positive">
+                <i class="fas fa-percentage"></i> {% with ratio=remaining_budget|default:0|add:0 %}
+                {{ ratio|add:"0" }}{# Ensure it's a number #}
+                {% widthratio ratio total_budget 100 as percentage %}
+                {{ percentage|floatformat:0 }}%
+              {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <form method="GET" action="{% url 'financial_aid_list' %}" class="filters-section">
+        <div class="filter-group">
+            <label for="education_level">Education Level</label>
+            <select id="education_level" name="education_level" class="filter-select">
+                <option value="">All Levels</option>
+                {% for level in education_levels %}
+                    <option value="{{ level.0 }}" {% if request.GET.education_level == level.0 %}selected{% endif %}>{{ level.1 }}</option>
                 {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Budget Overview -->
-    <div class="budget-overview">
-        <div class="flex justify-between items-center mb-6">
-            <h3>Active Budgets</h3>
-            <a href="{% url 'budget_list' %}" class="btn btn-secondary">
-                <i class="fas fa-list"></i> View All Budgets
-            </a>
+            </select>
         </div>
-        
-        {% for budget in active_budgets %}
-        <div class="budget-item">
-            <div class="budget-header">
-                <div class="budget-title">{{ budget.name }}</div>
-                <div class="budget-amount">${{ budget.total_amount }}</div>
-            </div>
-            <div class="progress-container">
-                <div class="progress-bar 
-                    {% if budget.spent_amount_percent < 70 %}progress-safe
-                    {% elif budget.spent_amount_percent < 90 %}progress-warning
-                    {% else %}progress-danger{% endif %}" 
-                    style="width: {{ budget.spent_amount_percent }}%">
+        <div class="filter-group">
+            <label for="status">Status</label>
+            <select id="status" name="status" class="filter-select">
+                <option value="">All Statuses</option>
+                {% for status in status_choices %}
+                    <option value="{{ status.0 }}" {% if request.GET.status == status.0 %}selected{% endif %}>{{ status.1 }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="year">Academic Year</label>
+            <select id="year" name="year" class="filter-select">
+                <option value="">All Years</option>
+                {% for year in academic_years %}
+                    <option value="{{ year }}" {% if request.GET.year == year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="sponsor">Sponsor</label>
+            <select id="sponsor" name="sponsor" class="filter-select">
+                <option value="">All Sponsors</option>
+                {% for sponsor in sponsors %}
+                    <option value="{{ sponsor.id }}" {% if request.GET.sponsor == sponsor.id|stringformat:"s" %}selected{% endif %}>{{ sponsor.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="align-self: flex-end;">Apply Filters</button>
+    </form>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Disbursement Trends</h3>
+                <div class="chart-tabs">
+                    <button class="chart-tab active">By Term</button>
+                    <button class="chart-tab">By Level</button>
+                    <button class="chart-tab">By Region</button>
                 </div>
             </div>
-            <div class="budget-meta">
-                <div>Spent: ${{ budget.spent_amount }}</div>
-                <div>Remaining: ${{ budget.remaining_amount }}</div>
+            <div class="chart-container">
+                <canvas id="disbursementTrendChart"></canvas>
             </div>
         </div>
-        {% empty %}
-        <p>No active budgets found</p>
-        {% endfor %}
+        
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Funding Sources</h3>
+                <div class="chart-tabs">
+                    <button class="chart-tab active">{{ academic_year }}</button>
+                    <button class="chart-tab">All Years</button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="fundingSourcesChart"></canvas>
+            </div>
+        </div>
     </div>
 
+    <!-- Recent Disbursements Table -->
+    <div class="chart-header" style="margin-top: 2rem;">
+        <h3>Recent Disbursements</h3>
+        <a href="{% url 'financial_aid_list' %}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+            View All <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+    <table class="financial-table">
+        <thead>
+            <tr>
+                <th>Beneficiary</th>
+                <th>Institution</th>
+                <th>Amount</th>
+                <th>Payment Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for aid in recent_disbursements %}
+            <tr>
+                <td>
+                    <div style="display: flex; align-items: center;">
+                        <img src="{% if aid.beneficiary.photo %}{{ aid.beneficiary.photo.url }}{% else %}{% static 'img/default-avatar.png' %}{% endif %}" alt="Student" class="student-avatar">
+                        <div>
+                            <div style="font-weight: 600;">{{ aid.beneficiary.first_name }} {{ aid.beneficiary.last_name }}</div>
+                            <div style="font-size: 0.8rem; color: var(--gray);">{{ aid.beneficiary.get_current_level_display }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>{% if aid.beneficiary.institution %}{{ aid.beneficiary.institution.name }}{% else %}--{% endif %}</td>
+                <td><span class="currency-amount">{{ aid.amount_approved|floatformat:2 }}</span></td>
+                <td>{{ aid.disbursement_date|date:"d M Y" }}</td>
+                <td>
+                    {% if aid.status == 'approved' %}
+                        <span class="status-badge status-approved">Approved</span>
+                    {% elif aid.status == 'pending' %}
+                        <span class="status-badge status-pending">Pending</span>
+                    {% elif aid.status == 'rejected' %}
+                        <span class="status-badge status-rejected">Rejected</span>
+                    {% elif aid.status == 'disbursed' %}
+                        <span class="status-badge status-disbursed">Disbursed</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'financial_aid_detail' pk=aid.pk %}" class="action-btn view" title="View Details"><i class="fas fa-eye"></i></a>
+                    <a href="{% url 'financial_aid_detail' pk=aid.pk %}" class="action-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-4">No recent disbursements found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+$(document).ready(function() {
     // Initialize charts
-    document.addEventListener('DOMContentLoaded', function() {
-        // Monthly Summary Chart
-        const monthlyCtx = document.createElement('canvas');
-        document.querySelector('.chart-placeholder').replaceWith(monthlyCtx);
-        
-        new Chart(monthlyCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                datasets: [
-                    {
-                        label: 'Income',
-                        data: [1200, 1900, 1500, 2000, 1800, 2200, 2400, 2100, 2300, 2500, 2700, 3000],
-                        backgroundColor: 'rgba(76, 201, 240, 0.7)',
-                        borderColor: 'rgba(76, 201, 240, 1)',
-                        borderWidth: 1
+    const trendCtx = document.getElementById('disbursementTrendChart').getContext('2d');
+    const trendChart = new Chart(trendCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Term 1', 'Term 2', 'Term 3'],
+            datasets: [
+                {
+                    label: '{{ academic_year }} Disbursements',
+                    data: [1250000, 1450000, 1587500],
+                    backgroundColor: 'rgba(67, 97, 238, 0.7)',
+                    borderColor: '#4361ee',
+                    borderWidth: 1,
+                    borderRadius: 6
+                },
+                {
+                    label: 'Previous Year Disbursements',
+                    data: [1100000, 1300000, 1400000],
+                    backgroundColor: 'rgba(76, 201, 240, 0.7)',
+                    borderColor: '#4cc9f0',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    align: 'end',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'KES ' + context.raw.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        drawBorder: false
                     },
-                    {
-                        label: 'Expenses',
-                        data: [800, 1200, 1000, 1500, 1300, 1800, 2000, 1700, 1900, 2100, 2300, 2500],
-                        backgroundColor: 'rgba(247, 37, 133, 0.7)',
-                        borderColor: 'rgba(247, 37, 133, 1)',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+                    ticks: {
+                        callback: function(value) {
+                            return 'KES ' + (value / 1000) + 'K';
+                        }
                     }
                 }
             }
-        });
-
-        // Transaction Types Chart
-        const typesCtx = document.createElement('canvas');
-        document.querySelectorAll('.chart-placeholder')[1].replaceWith(typesCtx);
-        
-        new Chart(typesCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Sponsorship', 'Donations', 'Expenses', 'Refunds', 'Other'],
-                datasets: [{
-                    data: [45, 25, 20, 5, 5],
-                    backgroundColor: [
-                        'rgba(67, 97, 238, 0.7)',
-                        'rgba(76, 201, 240, 0.7)',
-                        'rgba(247, 37, 133, 0.7)',
-                        'rgba(248, 150, 30, 0.7)',
-                        'rgba(108, 117, 125, 0.7)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                    }
-                }
-            }
-        });
+        }
     });
+
+    // Funding Sources Chart
+    const fundingCtx = document.getElementById('fundingSourcesChart').getContext('2d');
+    const fundingChart = new Chart(fundingCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['ABC Foundation', 'XYZ Corporation', 'Individual Donors', 'Government Grants'],
+            datasets: [{
+                data: [45, 30, 15, 10],
+                backgroundColor: [
+                    '#4361ee',
+                    '#4895ef',
+                    '#4cc9f0',
+                    '#f8961e'
+                ],
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            return `${label}: ${value}%`;
+                        }
+                    }
+                }
+            },
+            cutout: '70%',
+            animation: {
+                animateScale: true,
+                animateRotate: true
+            }
+        }
+    });
+
+    // Tab functionality for charts
+    $('.chart-tab').on('click', function() {
+        // Remove active class from all tabs in this group
+        $(this).siblings('.chart-tab').removeClass('active');
+        // Add active class to clicked tab
+        $(this).addClass('active');
+        // Here you would typically update the chart data based on the selected tab
+    });
+
+    // Submit filter form on select change
+    $('#education_level, #status, #year, #sponsor').on('change', function() {
+        $(this).closest('form').submit();
+    });
+});
 </script>
 {% endblock %}

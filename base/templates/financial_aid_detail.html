@@ -1,0 +1,416 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Detail view specific styles */
+    .detail-card {
+        background-color: var(--white);
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--gray-light);
+    }
+    
+    .detail-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+    
+    .detail-status {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .detail-status.pending {
+        background-color: rgba(248, 150, 30, 0.1);
+        color: var(--warning);
+    }
+    
+    .detail-status.approved {
+        background-color: rgba(76, 201, 240, 0.1);
+        color: var(--success);
+    }
+    
+    .detail-status.rejected {
+        background-color: rgba(247, 37, 133, 0.1);
+        color: var(--danger);
+    }
+    
+    .detail-status.disbursed {
+        background-color: rgba(67, 97, 238, 0.1);
+        color: var(--primary);
+    }
+    
+    .detail-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    
+    .detail-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .detail-section h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray);
+        margin-bottom: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .detail-row {
+        display: flex;
+        margin-bottom: 0.75rem;
+    }
+    
+    .detail-label {
+        flex: 0 0 150px;
+        font-weight: 500;
+        color: var(--dark);
+    }
+    
+    .detail-value {
+        flex: 1;
+        color: var(--gray);
+    }
+    
+    .detail-value.currency {
+        font-weight: 600;
+        color: var(--dark);
+    }
+    
+    .detail-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--gray-light);
+    }
+    
+    .beneficiary-card {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        background-color: var(--lighter);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .beneficiary-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--primary-light);
+    }
+    
+    .beneficiary-info h2 {
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+    }
+    
+    .beneficiary-meta {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--gray);
+    }
+    
+    .beneficiary-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .status-form {
+        background-color: var(--lighter);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .status-form h3 {
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+    }
+    
+    .status-options {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .status-option {
+        flex: 1;
+    }
+    
+    .status-option input[type="radio"] {
+        display: none;
+    }
+    
+    .status-option label {
+        display: block;
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        background-color: var(--white);
+        border: 1px solid var(--gray-light);
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .status-option input[type="radio"]:checked + label {
+        border-color: var(--primary);
+        background-color: var(--primary-light);
+    }
+    
+    .status-option.pending label {
+        border-left: 4px solid var(--warning);
+    }
+    
+    .status-option.approved label {
+        border-left: 4px solid var(--success);
+    }
+    
+    .status-option.rejected label {
+        border-left: 4px solid var(--danger);
+    }
+    
+    .status-option.disbursed label {
+        border-left: 4px solid var(--primary);
+    }
+    
+    @media (max-width: 992px) {
+        .detail-content {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .beneficiary-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .beneficiary-meta {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .status-options {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="detail-card">
+    <div class="detail-header">
+        <h1 class="detail-title">Financial Aid Record #{{ financial_aid.id }}</h1>
+        <span class="detail-status {{ financial_aid.status }}">{{ financial_aid.get_status_display }}</span>
+    </div>
+
+    <div class="beneficiary-card">
+        <img src="{% if financial_aid.beneficiary.photo %}{{ financial_aid.beneficiary.photo.url }}{% else %}{% static 'img/default-avatar.png' %}{% endif %}" 
+             alt="{{ financial_aid.beneficiary.full_name }}" class="beneficiary-avatar">
+        <div class="beneficiary-info">
+            <h2>{{ financial_aid.beneficiary.full_name }}</h2>
+            <div>{{ financial_aid.beneficiary.get_current_level_display }}</div>
+            <div class="beneficiary-meta">
+                <span><i class="fas fa-school"></i> {% if financial_aid.beneficiary.institution %}{{ financial_aid.beneficiary.institution.name }}{% else %}No institution{% endif %}</span>
+                <span><i class="fas fa-user-tie"></i> {% if financial_aid.beneficiary.sponsor %}{{ financial_aid.beneficiary.sponsor.name }}{% else %}No sponsor{% endif %}</span>
+                <span><i class="fas fa-id-card"></i> {{ financial_aid.beneficiary.national_id|default:"No ID" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-content">
+        <div>
+            <div class="detail-section">
+                <h3>Request Details</h3>
+                <div class="detail-row">
+                    <div class="detail-label">Academic Year:</div>
+                    <div class="detail-value">{{ financial_aid.academic_year }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Term:</div>
+                    <div class="detail-value">{{ financial_aid.get_term_display }}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Request Date:</div>
+                    <div class="detail-value">{{ financial_aid.request_date|date:"d M Y" }}</div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h3>Financial Information</h3>
+                <div class="detail-row">
+                    <div class="detail-label">Amount Requested:</div>
+                    <div class="detail-value currency">KES {{ financial_aid.amount_requested|floatformat:2 }}</div>
+                </div>
+                {% if financial_aid.amount_approved %}
+                <div class="detail-row">
+                    <div class="detail-label">Amount Approved:</div>
+                    <div class="detail-value currency">KES {{ financial_aid.amount_approved|floatformat:2 }}</div>
+                </div>
+                {% endif %}
+                {% if financial_aid.receipt_number %}
+                <div class="detail-row">
+                    <div class="detail-label">Receipt Number:</div>
+                    <div class="detail-value">{{ financial_aid.receipt_number }}</div>
+                </div>
+                {% endif %}
+                {% if financial_aid.payment_method %}
+                <div class="detail-row">
+                    <div class="detail-label">Payment Method:</div>
+                    <div class="detail-value">{{ financial_aid.payment_method }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div>
+            <div class="detail-section">
+                <h3>Approval Details</h3>
+                {% if financial_aid.status != 'pending' %}
+                    <div class="detail-row">
+                        <div class="detail-label">Status:</div>
+                        <div class="detail-value">
+                            <span class="status-badge status-{{ financial_aid.status }}">
+                                {{ financial_aid.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% if financial_aid.approval_date %}
+                    <div class="detail-row">
+                        <div class="detail-label">Approval Date:</div>
+                        <div class="detail-value">{{ financial_aid.approval_date|date:"d M Y" }}</div>
+                    </div>
+                    {% endif %}
+                    {% if financial_aid.approved_by %}
+                    <div class="detail-row">
+                        <div class="detail-label">Approved By:</div>
+                        <div class="detail-value">{{ financial_aid.approved_by.get_full_name }}</div>
+                    </div>
+                    {% endif %}
+                    {% if financial_aid.disbursement_date %}
+                    <div class="detail-row">
+                        <div class="detail-label">Disbursement Date:</div>
+                        <div class="detail-value">{{ financial_aid.disbursement_date|date:"d M Y" }}</div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="detail-row">
+                        <div class="detail-value">This request is pending approval</div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="detail-section">
+                <h3>Notes</h3>
+                {% if financial_aid.notes %}
+                    <div style="background-color: var(--lighter); padding: 1rem; border-radius: var(--border-radius);">
+                        {{ financial_aid.notes|linebreaks }}
+                    </div>
+                {% else %}
+                    <div class="detail-value">No notes available</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if request.user.is_superuser or request.user.is_staff %}
+    <div class="status-form">
+        <h3>Update Status</h3>
+        <form method="post" action="{% url 'update_financial_aid_status' pk=financial_aid.pk %}">
+            {% csrf_token %}
+            
+            <div class="status-options">
+                <div class="status-option pending">
+                    <input type="radio" id="status_pending" name="status" value="pending" {% if financial_aid.status == 'pending' %}checked{% endif %}>
+                    <label for="status_pending">
+                        <i class="fas fa-clock fa-2x" style="color: var(--warning); margin-bottom: 0.5rem;"></i><br>
+                        Pending
+                    </label>
+                </div>
+                
+                <div class="status-option approved">
+                    <input type="radio" id="status_approved" name="status" value="approved" {% if financial_aid.status == 'approved' %}checked{% endif %}>
+                    <label for="status_approved">
+                        <i class="fas fa-check-circle fa-2x" style="color: var(--success); margin-bottom: 0.5rem;"></i><br>
+                        Approve
+                    </label>
+                </div>
+                
+                <div class="status-option rejected">
+                    <input type="radio" id="status_rejected" name="status" value="rejected" {% if financial_aid.status == 'rejected' %}checked{% endif %}>
+                    <label for="status_rejected">
+                        <i class="fas fa-times-circle fa-2x" style="color: var(--danger); margin-bottom: 0.5rem;"></i><br>
+                        Reject
+                    </label>
+                </div>
+                
+                <div class="status-option disbursed">
+                    <input type="radio" id="status_disbursed" name="status" value="disbursed" {% if financial_aid.status == 'disbursed' %}checked{% endif %}>
+                    <label for="status_disbursed">
+                        <i class="fas fa-money-bill-wave fa-2x" style="color: var(--primary); margin-bottom: 0.5rem;"></i><br>
+                        Disburse
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount_approved">Approved Amount (KES)</label>
+                <input type="number" name="amount_approved" id="amount_approved" 
+                       class="form-control" value="{{ financial_aid.amount_approved|default:'' }}" 
+                       step="0.01" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="notes">Update Notes</label>
+                <textarea name="notes" id="notes" class="form-control" rows="3">{{ financial_aid.notes|default:'' }}</textarea>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% url 'financial_aid_list' %}" class="btn btn-secondary">
+                    Back to List
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Status
+                </button>
+                <a href="{% url 'edit_financial_aid' pk=financial_aid.pk %}" class="btn btn-secondary">
+                    <i class="fas fa-edit"></i> Edit Details
+                </a>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <div class="detail-actions">
+        <a href="{% url 'financial_aid_list' %}" class="btn btn-secondary">
+            Back to List
+        </a>
+        {% if financial_aid.status == 'pending' %}
+        <a href="{% url 'edit_financial_aid' pk=financial_aid.pk %}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit Request
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

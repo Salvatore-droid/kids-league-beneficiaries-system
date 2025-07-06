@@ -316,257 +316,47 @@ class Sponsor(models.Model):
     def __str__(self):
         return self.name
 
-class FinancialAccount(models.Model):
-    ACCOUNT_TYPES = (
-        ('bank', 'Bank Account'),
-        ('mobile_money', 'Mobile Money'),
-        ('cash', 'Cash Account'),
-    )
-    
-    name = models.CharField(max_length=100)
-    account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPES)
-    account_number = models.CharField(max_length=50)
-    bank_name = models.CharField(max_length=100, blank=True, null=True)
-    branch = models.CharField(max_length=100, blank=True, null=True)
-    current_balance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return f"{self.name} ({self.get_account_type_display()})"
-
-# class Transaction(models.Model):
-#     TRANSACTION_TYPES = (
-#         ('income', 'Income'),
-#         ('expense', 'Expense'),
-#         ('transfer', 'Transfer'),
-#     )
-    
-#     PAYMENT_METHODS = (
-#         ('cash', 'Cash'),
-#         ('check', 'Check'),
-#         ('bank_transfer', 'Bank Transfer'),
-#         ('mobile_money', 'Mobile Money'),
-#         ('credit_card', 'Credit Card'),
-#     )
-    
-#     account = models.ForeignKey(FinancialAccount, on_delete=models.PROTECT)
-#     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
-#     amount = models.DecimalField(max_digits=15, decimal_places=2)
-#     date = models.DateField()
-#     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
-#     reference_number = models.CharField(max_length=100, blank=True, null=True)
-#     description = models.TextField()
-#     beneficiary = models.ForeignKey(Beneficiary, on_delete=models.SET_NULL, null=True, blank=True)
-#     sponsor = models.ForeignKey(Sponsor, on_delete=models.SET_NULL, null=True, blank=True)
-#     institution = models.ForeignKey(Institution, on_delete=models.SET_NULL, null=True, blank=True)
-#     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-    
-#     def __str__(self):
-#         return f"{self.get_transaction_type_display()} - {self.amount} on {self.date}"
-    
-#     def save(self, *args, **kwargs):
-#         # Update account balance when transaction is saved
-#         if not self.pk:  # New transaction
-#             if self.transaction_type == 'income':
-#                 self.account.current_balance += self.amount
-#             elif self.transaction_type == 'expense':
-#                 self.account.current_balance -= self.amount
-#             self.account.save()
-#         super().save(*args, **kwargs)
-
-# class Budget(models.Model):
-#     BUDGET_TYPES = (
-#         ('sponsorship', 'Sponsorship'),
-#         ('operations', 'Operations'),
-#         ('programs', 'Programs'),
-#         ('fundraising', 'Fundraising'),
-#     )
-    
-#     name = models.CharField(max_length=100)
-#     budget_type = models.CharField(max_length=20, choices=BUDGET_TYPES)
-#     amount = models.DecimalField(max_digits=15, decimal_places=2)
-#     start_date = models.DateField()
-#     end_date = models.DateField()
-#     description = models.TextField(blank=True, null=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-    
-#     def __str__(self):
-#         return f"{self.name} ({self.get_budget_type_display()})"
-    
-#     @property
-#     def spent_amount(self):
-#         return Transaction.objects.filter(
-#             transaction_type='expense',
-#             date__gte=self.start_date,
-#             date__lte=self.end_date,
-#             description__icontains=self.name
-#         ).aggregate(Sum('amount'))['amount__sum'] or 0
-    
-#     @property
-#     def remaining_amount(self):
-#         return self.amount - self.spent_amount
-
-# class Invoice(models.Model):
-#     STATUS_CHOICES = (
-#         ('draft', 'Draft'),
-#         ('sent', 'Sent'),
-#         ('paid', 'Paid'),
-#         ('overdue', 'Overdue'),
-#         ('cancelled', 'Cancelled'),
-#     )
-    
-#     invoice_number = models.CharField(max_length=50, unique=True)
-#     sponsor = models.ForeignKey(Sponsor, on_delete=models.PROTECT)
-#     date = models.DateField()
-#     due_date = models.DateField()
-#     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
-#     amount = models.DecimalField(max_digits=15, decimal_places=2)
-#     tax_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-#     discount_amount = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-#     total_amount = models.DecimalField(max_digits=15, decimal_places=2)
-#     notes = models.TextField(blank=True, null=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-    
-#     def __str__(self):
-#         return f"Invoice #{self.invoice_number} - {self.sponsor}"
-    
-#     def save(self, *args, **kwargs):
-#         if not self.invoice_number:
-#             # Generate invoice number
-#             last_invoice = Invoice.objects.order_by('-id').first()
-#             last_number = int(last_invoice.invoice_number.split('-')[1]) if last_invoice else 0
-#             self.invoice_number = f"INV-{last_number + 1:05d}"
-        
-#         self.total_amount = self.amount + self.tax_amount - self.discount_amount
-#         super().save(*args, **kwargs)
-
-# class InvoiceItem(models.Model):
-#     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='items')
-#     description = models.CharField(max_length=200)
-#     quantity = models.DecimalField(max_digits=10, decimal_places=2)
-#     unit_price = models.DecimalField(max_digits=15, decimal_places=2)
-#     tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-#     amount = models.DecimalField(max_digits=15, decimal_places=2)
-    
-#     def __str__(self):
-#         return f"{self.description} - {self.amount}"
-    
-#     def save(self, *args, **kwargs):
-#         self.amount = self.quantity * self.unit_price * (1 + self.tax_rate / 100)
-#         super().save(*args, **kwargs)
-
-
-class FinancialTransaction(models.Model):
-    TRANSACTION_TYPES = (
-        ('sponsorship', 'Sponsorship Payment'),
-        ('donation', 'Donation'),
-        ('expense', 'Expense'),
-        ('refund', 'Refund'),
-        ('other', 'Other'),
-    )
-    
-    PAYMENT_METHODS = (
-        ('bank', 'Bank Transfer'),
-        ('mobile', 'Mobile Money'),
-        ('cash', 'Cash'),
-        ('check', 'Check'),
-        ('card', 'Credit/Debit Card'),
-    )
-    
+class FinancialAid(models.Model):
     STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('completed', 'Completed'),
-        ('failed', 'Failed'),
-        ('reversed', 'Reversed'),
+        ('pending', 'Pending Approval'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+        ('disbursed', 'Disbursed'),
     )
     
-    transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
-    currency = models.CharField(max_length=3, default='USD')
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
-    transaction_date = models.DateField()
-    recorded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    beneficiary = models.ForeignKey(Beneficiary, on_delete=models.SET_NULL, null=True, blank=True)
-    sponsor = models.ForeignKey(Sponsor, on_delete=models.SET_NULL, null=True, blank=True)
-    institution = models.ForeignKey(Institution, on_delete=models.SET_NULL, null=True, blank=True)
-    reference_number = models.CharField(max_length=50, unique=True)
-    description = models.TextField(blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    receipt = models.FileField(upload_to='receipts/', blank=True, null=True)
+    TERM_CHOICES = (
+        ('1', 'Term 1'),
+        ('2', 'Term 2'),
+        ('3', 'Term 3'),
+    )
+    
+    beneficiary = models.ForeignKey(Beneficiary, on_delete=models.CASCADE, related_name='financial_aids')
+    academic_year = models.CharField(max_length=9)  # Format: 2023-2024
+    term = models.CharField(max_length=1, choices=TERM_CHOICES)
+    amount_requested = models.DecimalField(max_digits=10, decimal_places=2)
+    amount_approved = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    request_date = models.DateField(auto_now_add=True)
+    approval_date = models.DateField(null=True, blank=True)
+    disbursement_date = models.DateField(null=True, blank=True)
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_aids')
     notes = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    receipt_number = models.CharField(max_length=50, blank=True)
+    payment_method = models.CharField(max_length=50, blank=True)
     
     class Meta:
-        ordering = ['-transaction_date']
-        verbose_name = 'Financial Transaction'
-        verbose_name_plural = 'Financial Transactions'
+        ordering = ['-request_date']
+        verbose_name_plural = 'Financial Aids'
     
     def __str__(self):
-        return f"{self.get_transaction_type_display()} - {self.amount} {self.currency} ({self.reference_number})"
-
-class Budget(models.Model):
-    BUDGET_TYPES = (
-        ('annual', 'Annual Budget'),
-        ('project', 'Project Budget'),
-        ('sponsorship', 'Sponsorship Budget'),
-        ('operational', 'Operational Budget'),
-    )
+        return f"{self.beneficiary} - {self.get_term_display()} {self.academic_year}"
     
-    name = models.CharField(max_length=200)
-    budget_type = models.CharField(max_length=20, choices=BUDGET_TYPES)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    description = models.TextField(blank=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        ordering = ['-start_date']
-    
-    def __str__(self):
-        return f"{self.name} ({self.get_budget_type_display()})"
-    
-    @property
-    def spent_amount(self):
-        return FinancialTransaction.objects.filter(
-            transaction_date__gte=self.start_date,
-            transaction_date__lte=self.end_date,
-            status='completed'
-        ).aggregate(Sum('amount'))['amount__sum'] or 0
-    
-    @property
-    def remaining_amount(self):
-        return self.total_amount - self.spent_amount
-
-class FinancialReport(models.Model):
-    REPORT_TYPES = (
-        ('monthly', 'Monthly Report'),
-        ('quarterly', 'Quarterly Report'),
-        ('annual', 'Annual Report'),
-        ('sponsorship', 'Sponsorship Report'),
-        ('custom', 'Custom Report'),
-    )
-    
-    name = models.CharField(max_length=200)
-    report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    generated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    generated_at = models.DateTimeField(auto_now_add=True)
-    report_file = models.FileField(upload_to='reports/')
-    notes = models.TextField(blank=True)
-    
-    class Meta:
-        ordering = ['-generated_at']
-    
-    def __str__(self):
-        return f"{self.name} ({self.get_report_type_display()})"
+    def save(self, *args, **kwargs):
+        # If status is being updated to approved/disbursed, set the appropriate dates
+        if self.pk:
+            original = FinancialAid.objects.get(pk=self.pk)
+            if self.status == 'approved' and original.status != 'approved':
+                self.approval_date = timezone.now().date()
+            elif self.status == 'disbursed' and original.status != 'disbursed':
+                self.disbursement_date = timezone.now().date()
+        super().save(*args, **kwargs)
